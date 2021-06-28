@@ -1,4 +1,5 @@
 import std/unittest
+import pkg/questionable
 import pkg/stew/byteutils
 import abc/keys
 
@@ -29,8 +30,19 @@ suite "Keys":
   test "can be used to verify signatures":
     let message1 = "hello".toBytes
     let message2 = "hallo".toBytes
-    let private = PrivateKey.random()
+    let private = PrivateKey.random
     let public = private.toPublicKey
     let signature = private.sign(message1)
     check public.verify(message1, signature)
     check not public.verify(message2, signature)
+
+  test "public key can be converted to bytes":
+    let key = PrivateKey.random.toPublicKey
+    let bytes = key.toBytes
+    check PublicKey.fromBytes(bytes) == key.some
+
+  test "conversion from bytes to public key can fail":
+    let key = PrivateKey.random.toPublicKey
+    let bytes = key.toBytes
+    let invalid = bytes[1..^1]
+    check PublicKey.fromBytes(invalid) == PublicKey.none

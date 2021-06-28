@@ -1,5 +1,6 @@
 import pkg/blscurve as bls
 import pkg/nimcrypto
+import pkg/questionable
 
 type
   PrivateKey* = distinct bls.SecretKey
@@ -32,3 +33,15 @@ func verify*(key: PublicKey,
   ## modified BLS multi-signature construction as described in:
   ## https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html
   bls.PublicKey(key).verify(message, bls.Signature(signature))
+
+func toBytes*(key: PublicKey): seq[byte] =
+  var bytes: array[48, byte]
+  doAssert serialize(bytes, bls.PublicKey(key))
+  @bytes
+
+func fromBytes*(_: type PublicKey, bytes: openArray[byte]): ?PublicKey =
+  var key: bls.PublicKey
+  if key.fromBytes(bytes):
+    PublicKey(key).some
+  else:
+    PublicKey.none
