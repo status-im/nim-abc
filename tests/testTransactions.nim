@@ -40,3 +40,13 @@ suite "Transactions":
     expected.add(bob.toBytes)
     expected.add(30.u256.toBytes)
     check transaction.toBytes == expected
+
+  test "signatures can be added to a transaction":
+    let key1, key2 = PrivateKey.example
+    var transaction = Transaction.example
+    let sig1 = key1.sign(transaction.hash.toBytes)
+    let sig2 = key2.sign(transaction.hash.toBytes)
+    transaction.add(sig1)
+    check transaction.signature == sig1
+    transaction.add(sig2)
+    check transaction.signature == aggregate(sig1, sig2)

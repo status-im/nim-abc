@@ -35,6 +35,12 @@ func inputs*(transaction: Transaction): seq[TxInput] =
 func outputs*(transaction: Transaction): seq[TxOutput] =
   transaction.outputs
 
+func signature*(transaction: Transaction): Signature =
+  transaction.signature
+
+func add*(transaction: var Transaction, signature: Signature) =
+  transaction.signature = aggregate(transaction.signature, signature)
+
 func toBytes*(hash: TxHash): array[32, byte] =
   MDigest[256](hash).data
 
