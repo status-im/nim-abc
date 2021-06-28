@@ -1,3 +1,5 @@
+import std/sugar
+import std/sequtils
 import pkg/blscurve as bls
 import pkg/nimcrypto
 import pkg/questionable
@@ -33,6 +35,16 @@ func verify*(key: PublicKey,
   ## modified BLS multi-signature construction as described in:
   ## https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html
   bls.PublicKey(key).verify(message, bls.Signature(signature))
+
+func aggregate*(keys: varargs[PublicKey]): PublicKey =
+  var aggregate: bls.PublicKey
+  doAssert aggregateAll(aggregate, @keys.map(key => bls.PublicKey(key)))
+  PublicKey(aggregate)
+
+func aggregate*(signatures: varargs[Signature]): Signature =
+  var aggregate: bls.Signature
+  doAssert aggregateAll(aggregate, @signatures.map(sig => bls.Signature(sig)))
+  Signature(aggregate)
 
 func toBytes*(key: PublicKey): seq[byte] =
   var bytes: array[48, byte]

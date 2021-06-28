@@ -47,3 +47,19 @@ suite "Keys":
     let bytes = key.toBytes
     let invalid = bytes[1..^1]
     check PublicKey.fromBytes(invalid) == PublicKey.none
+
+  test "public keys can be aggregated":
+    let key1, key2, key3 = PublicKey.example
+    check aggregate(key1, key2) != aggregate(key1, key3)
+    check aggregate(key1, key2) == aggregate(key2, key1)
+    check aggregate(PublicKey.default, key1) == key1
+    check aggregate(aggregate(key1, key2), key3) == aggregate(key1, key2, key3)
+
+  test "signatures can be aggregated":
+    let key1, key2 = PrivateKey.example
+    let message = "hello".toBytes
+    let sig1 = key1.sign(message)
+    let sig2 = key2.sign(message)
+    let aggregateKey = aggregate(key1.toPublicKey, key2.toPublicKey)
+    let aggregateSig = aggregate(sig1, sig2)
+    check aggregateKey.verify(message, aggregateSig)
