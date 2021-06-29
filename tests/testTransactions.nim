@@ -1,10 +1,10 @@
 import ./basics
+import ./alicebob
 
 suite "Transactions":
 
-  let aliceKey, bobKey = PrivateKey.example
-  let alice = aliceKey.toPublicKey
-  let bob = bobKey.toPublicKey
+  let alice = PublicKey.alice
+  let bob = PublicKey.bob
 
   test "a genesis transaction can be made":
     let genesis = Transaction.init({alice: 32.u256, bob: 10.u256})
@@ -67,9 +67,9 @@ suite "Transactions":
     )
     let hash = transaction.hash.toBytes
     check not transaction.hasValidSignature
-    transaction.add(aliceKey.sign(hash))
+    transaction.add(PrivateKey.alice.sign(hash))
     check transaction.hasValidSignature
-    transaction.add(bobKey.sign(hash))
+    transaction.add(PrivateKey.bob.sign(hash))
     check not transaction.hasValidSignature
 
   test "transaction must have at least one output":
