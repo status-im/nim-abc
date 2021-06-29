@@ -2,6 +2,7 @@ import ./keys
 import ./transactions
 
 export keys
+export transactions
 
 type
   Wallet* = object

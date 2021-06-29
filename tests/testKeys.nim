@@ -1,8 +1,5 @@
-import std/unittest
-import pkg/questionable
 import pkg/stew/byteutils
-import abc/keys
-import ./examples
+import ./basics
 
 suite "Keys":
 

@@ -1,7 +1,4 @@
-import std/unittest
-import abc/wallet
-import abc/transactions
-import ./examples
+import ./basics
 
 suite "Wallets":
 
