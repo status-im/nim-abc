@@ -1,6 +1,10 @@
+import std/sequtils
+import std/sugar
 import pkg/nimcrypto
 import pkg/stint
+import pkg/questionable
 import ./keys
+import ./helpers
 
 export stint
 export keys
@@ -22,11 +26,17 @@ func `==`*(a, b: TxHash): bool {.borrow.}
 
 func init*(_: type Transaction,
            inputs: openArray[TxInput],
-           outputs: openArray[TxOutput]): Transaction =
-  Transaction(inputs: @inputs, outputs: @outputs)
+           outputs: openArray[TxOutput]): ?Transaction =
+  if outputs.len == 0:
+    return none Transaction
+
+  if outputs.map(output => output.owner).hasDuplicates:
+    return none Transaction
+
+  some Transaction(inputs: @inputs, outputs: @outputs)
 
 func init*(_: type Transaction,
-           outputs: openArray[TxOutput]): Transaction =
+           outputs: openArray[TxOutput]): ?Transaction =
   Transaction.init([], outputs)
 
 func inputs*(transaction: Transaction): seq[TxInput] =
