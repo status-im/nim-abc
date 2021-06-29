@@ -5,7 +5,9 @@ import ./examples
 
 suite "Transactions":
 
-  let alice, bob = PublicKey.example
+  let aliceKey, bobKey = PrivateKey.example
+  let alice = aliceKey.toPublicKey
+  let bob = bobKey.toPublicKey
 
   test "a genesis transaction can be made":
     let genesis = Transaction.init({alice: 32.u256, bob: 10.u256})
@@ -52,6 +54,20 @@ suite "Transactions":
     check transaction.signature == sig1
     transaction.add(sig2)
     check transaction.signature == aggregate(sig1, sig2)
+
+  test "transaction signature can be checked for validity":
+    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256})
+    check not genesis.hasValidSignature()
+    var transaction = !Transaction.init(
+      {genesis.hash: alice},
+      {alice: 2.u256, bob: 30.u256}
+    )
+    let hash = transaction.hash.toBytes
+    check not transaction.hasValidSignature
+    transaction.add(aliceKey.sign(hash))
+    check transaction.hasValidSignature
+    transaction.add(bobKey.sign(hash))
+    check not transaction.hasValidSignature
 
   test "transaction must have at least one output":
     check Transaction.init([]).isNone
