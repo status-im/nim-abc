@@ -55,6 +55,12 @@ suite "Transactions":
     transaction.add(sig2)
     check transaction.signature == aggregate(sig1, sig2)
 
+  test "transaction can be signed by a private key":
+    let key = PrivateKey.example
+    var transaction = Transaction.example
+    key.sign(transaction)
+    check transaction.signature == key.sign(transaction.hash.toBytes)
+
   test "transaction signature can be checked for validity":
     let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256})
     check not genesis.hasValidSignature()

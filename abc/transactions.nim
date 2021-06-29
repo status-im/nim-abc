@@ -67,6 +67,9 @@ func toBytes*(transaction: Transaction): seq[byte] =
 func hash*(transaction: Transaction): TxHash =
   TxHash(sha256.digest(transaction.toBytes))
 
+func sign*(key: PrivateKey, transaction: var Transaction) =
+  transaction.add(key.sign(transaction.hash.toBytes))
+
 func hasValidSignature*(transaction: Transaction): bool =
   if transaction.inputs.len == 0:
     return false
