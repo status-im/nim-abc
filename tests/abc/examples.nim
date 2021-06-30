@@ -1,6 +1,7 @@
 import std/random
 import pkg/questionable
 import abc
+import abc/acks
 import ./alicebob
 
 proc example*(_: type PrivateKey): PrivateKey =
@@ -25,3 +26,7 @@ proc example*(_: type Transaction): Transaction =
     victor
   )
   transaction
+
+proc example*(_: type Ack): Ack =
+  let tx1, tx2 = Transaction.example
+  !Ack.init([tx1.hash, tx2.hash])
