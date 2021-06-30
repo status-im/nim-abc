@@ -5,9 +5,10 @@ suite "Transactions":
 
   let alice = PublicKey.alice
   let bob = PublicKey.bob
+  let victor = PublicKey.victor
 
   test "a genesis transaction can be made":
-    let genesis = Transaction.init({alice: 32.u256, bob: 10.u256})
+    let genesis = Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
     check genesis.isSome
 
   test "a transaction has a hash":
@@ -17,19 +18,21 @@ suite "Transactions":
     check transaction1.hash != transaction2.hash
 
   test "a transaction references outputs from other transactions":
-    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256})
+    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
     let transaction = !Transaction.init(
       {genesis.hash: alice},
-      {alice: 2.u256, bob: 30.u256}
+      {alice: 2.u256, bob: 30.u256},
+      victor
     )
     check transaction.inputs.len == 1
     check transaction.outputs.len == 2
 
   test "a transaction can be converted to bytes":
-    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256})
+    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
     let transaction = !Transaction.init(
       {genesis.hash: alice},
-      {alice: 2.u256, bob: 30.u256}
+      {alice: 2.u256, bob: 30.u256},
+      victor
     )
     var expected: seq[byte]
     expected.add(1) # amount of inputs
@@ -59,11 +62,12 @@ suite "Transactions":
     check transaction.signature == key.sign(transaction.hash.toBytes)
 
   test "transaction signature can be checked for validity":
-    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256})
+    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
     check not genesis.hasValidSignature()
     var transaction = !Transaction.init(
       {genesis.hash: alice},
-      {alice: 2.u256, bob: 30.u256}
+      {alice: 2.u256, bob: 30.u256},
+      victor
     )
     let hash = transaction.hash.toBytes
     check not transaction.hasValidSignature
@@ -73,7 +77,7 @@ suite "Transactions":
     check not transaction.hasValidSignature
 
   test "transaction must have at least one output":
-    check Transaction.init([]).isNone
+    check Transaction.init([], victor).isNone
 
   test "multiple outputs to the same owner are not allowed":
-    check Transaction.init({alice: 40.u256, alice: 2.u256}).isNone
+    check Transaction.init({alice: 40.u256, alice: 2.u256}, victor).isNone

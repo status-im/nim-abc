@@ -13,6 +13,7 @@ type
   Transaction* = object
     inputs: seq[TxInput]
     outputs: seq[TxOutput]
+    validator: PublicKey
     signature: Signature
   TxInput* = tuple
     txHash: TxHash
@@ -26,18 +27,20 @@ func `==`*(a, b: TxHash): bool {.borrow.}
 
 func init*(_: type Transaction,
            inputs: openArray[TxInput],
-           outputs: openArray[TxOutput]): ?Transaction =
+           outputs: openArray[TxOutput],
+           validator: PublicKey): ?Transaction =
   if outputs.len == 0:
     return none Transaction
 
   if outputs.map(output => output.owner).hasDuplicates:
     return none Transaction
 
-  some Transaction(inputs: @inputs, outputs: @outputs)
+  some Transaction(inputs: @inputs, outputs: @outputs, validator: validator)
 
 func init*(_: type Transaction,
-           outputs: openArray[TxOutput]): ?Transaction =
-  Transaction.init([], outputs)
+           outputs: openArray[TxOutput],
+           validator: PublicKey): ?Transaction =
+  Transaction.init([], outputs, validator)
 
 func inputs*(transaction: Transaction): seq[TxInput] =
   transaction.inputs
@@ -47,6 +50,9 @@ func outputs*(transaction: Transaction): seq[TxOutput] =
 
 func signature*(transaction: Transaction): Signature =
   transaction.signature
+
+func validator*(transaction: Transaction): PublicKey =
+  transaction.validator
 
 func add*(transaction: var Transaction, signature: Signature) =
   transaction.signature = aggregate(transaction.signature, signature)
