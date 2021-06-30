@@ -69,6 +69,7 @@ func toBytes*(transaction: Transaction): seq[byte] =
   for (owner, value) in transaction.outputs:
     result.add(owner.toBytes)
     result.add(value.toBytes)
+  result.add(transaction.validator.toBytes)
 
 func hash*(transaction: Transaction): TxHash =
   TxHash(sha256.digest(transaction.toBytes))

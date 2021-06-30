@@ -43,6 +43,7 @@ suite "Transactions":
     expected.add(2.u256.toBytes)
     expected.add(bob.toBytes)
     expected.add(30.u256.toBytes)
+    expected.add(victor.toBytes)
     check transaction.toBytes == expected
 
   test "signatures can be added to a transaction":
