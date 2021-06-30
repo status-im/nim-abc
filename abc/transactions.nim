@@ -19,7 +19,7 @@ type
     owner: PublicKey
   TxOutput* = tuple
     owner: PublicKey
-    amount: UInt256
+    value: UInt256
   TxHash* = distinct MDigest[256]
 
 func `==`*(a, b: TxHash): bool {.borrow.}
@@ -60,9 +60,9 @@ func toBytes*(transaction: Transaction): seq[byte] =
     result.add(txHash.toBytes)
     result.add(owner.toBytes)
   result.add(transaction.outputs.len.uint8)
-  for (owner, amount) in transaction.outputs:
+  for (owner, value) in transaction.outputs:
     result.add(owner.toBytes)
-    result.add(amount.toBytes)
+    result.add(value.toBytes)
 
 func hash*(transaction: Transaction): TxHash =
   TxHash(sha256.digest(transaction.toBytes))

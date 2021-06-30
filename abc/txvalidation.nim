@@ -6,10 +6,10 @@ func checkValue(store: TxStore, transaction: Transaction): bool =
   for (hash, owner) in transaction.inputs:
     for output in store[hash].outputs:
       if output.owner == owner:
-        valueIn += output.amount
+        valueIn += output.value
 
-  for (_, amount) in transaction.outputs:
-    valueOut += amount
+  for (_, value) in transaction.outputs:
+    valueOut += value
 
   valueIn == valueOut
 
