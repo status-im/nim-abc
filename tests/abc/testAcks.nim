@@ -35,6 +35,19 @@ suite "Acknowledgements":
     expected.add(tx2.hash.toBytes)
     check ack.toBytes == expected
 
+  test "a signature can be added to an acknowledgment":
+    let key = PrivateKey.example
+    var ack = Ack.example
+    let signature = key.sign(ack.hash.toBytes)
+    ack.signature = signature
+    check ack.signature == signature.some
+
+  test "an acknowledgement can be signed by a private key":
+    let key = PrivateKey.example
+    var ack = Ack.example
+    key.sign(ack)
+    check ack.signature == key.sign(ack.hash.toBytes).some
+
   test "an acknowledgement must contain at least one transaction":
     let previous = Ack.example
     check Ack.init(previous.hash, []).isNone
