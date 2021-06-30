@@ -15,13 +15,13 @@ proc example*(_: type Wallet): Wallet =
 
 proc example*(_: type Transaction): Transaction =
   let alice = PublicKey.alice
-  let bob = PublicKey.bob
+  let carol = PublicKey.example
   let victor = PublicKey.victor
   let genesis = Transaction.genesis
   let amount = rand(100).u256
   var transaction = !Transaction.init(
     {genesis.hash: alice},
-    {bob: amount, alice: 100.u256 - amount},
+    {carol: amount, alice: 100.u256 - amount},
     victor
   )
   transaction
