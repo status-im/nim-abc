@@ -5,9 +5,11 @@ import pkg/stint
 import pkg/questionable
 import ./keys
 import ./helpers
+import ./hash
 
 export stint
 export keys
+export hash
 
 type
   Transaction* = object
@@ -16,14 +18,11 @@ type
     validator: PublicKey
     signature: Signature
   TxInput* = tuple
-    txHash: TxHash
+    transaction: Hash
     owner: PublicKey
   TxOutput* = tuple
     owner: PublicKey
     value: UInt256
-  TxHash* = distinct MDigest[256]
-
-func `==`*(a, b: TxHash): bool {.borrow.}
 
 func init*(_: type Transaction,
            inputs: openArray[TxInput],
@@ -57,9 +56,6 @@ func validator*(transaction: Transaction): PublicKey =
 func add*(transaction: var Transaction, signature: Signature) =
   transaction.signature = aggregate(transaction.signature, signature)
 
-func toBytes*(hash: TxHash): array[32, byte] =
-  MDigest[256](hash).data
-
 func toBytes*(transaction: Transaction): seq[byte] =
   result.add(transaction.inputs.len.uint8)
   for (txHash, owner) in transaction.inputs:
@@ -71,8 +67,8 @@ func toBytes*(transaction: Transaction): seq[byte] =
     result.add(value.toBytes)
   result.add(transaction.validator.toBytes)
 
-func hash*(transaction: Transaction): TxHash =
-  TxHash(sha256.digest(transaction.toBytes))
+func hash*(transaction: Transaction): Hash =
+  hash(transaction.toBytes)
 
 func sign*(key: PrivateKey, transaction: var Transaction) =
   transaction.add(key.sign(transaction.hash.toBytes))

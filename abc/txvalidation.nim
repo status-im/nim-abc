@@ -13,14 +13,14 @@ func checkValue(store: TxStore, transaction: Transaction): bool =
 
   valueIn == valueOut
 
-func hasValidTx*(store: TxStore, hash: TxHash): bool =
-  if hash == store.genesis:
+func hasValidTx*(store: TxStore, txHash: Hash): bool =
+  if txHash == store.genesis:
     return true
 
-  if not store.hasTx(hash):
+  if not store.hasTx(txHash):
     return false
 
-  let transaction = store[hash]
+  let transaction = store[txHash]
 
   if not transaction.hasValidSignature:
     return false
