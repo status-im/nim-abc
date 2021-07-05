@@ -5,6 +5,7 @@ type
   Hash* = distinct MDigest[256]
 
 func `==`*(a, b: Hash): bool {.borrow.}
+func `$`*(h: Hash): string {.borrow.}
 
 func hash*(bytes: openArray[byte]): Hash =
   Hash(sha256.digest(bytes))
