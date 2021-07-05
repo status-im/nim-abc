@@ -1,3 +1,4 @@
+import pkg/questionable
 import std/tables
 import ./transactions
 import ./acks
@@ -8,6 +9,7 @@ type
     transactions: Table[Hash, Transaction]
     acks: Table[Hash, Ack]
 
+export questionable
 export transactions
 export acks
 
@@ -26,14 +28,8 @@ func init*(_: type TxStore, genesis: Transaction): TxStore =
 func genesis*(store: TxStore): Hash =
   store.genesis
 
-func hasTx*(store: TxStore, hash: Hash): bool =
-  store.transactions.hasKey(hash)
+func getTx*(store: TxStore, hash: Hash): ?Transaction =
+  store.transactions.?[hash]
 
-func hasAck*(store: TxStore, hash: Hash): bool =
-  store.acks.hasKey(hash)
-
-func getTx*(store: TxStore, hash: Hash): Transaction =
-  store.transactions[hash]
-
-func getAck*(store: TxStore, hash: Hash): Ack =
-  store.acks[hash]
+func getAck*(store: TxStore, hash: Hash): ?Ack =
+  store.acks.?[hash]
