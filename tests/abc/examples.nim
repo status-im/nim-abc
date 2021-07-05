@@ -29,4 +29,5 @@ proc example*(_: type Transaction): Transaction =
 
 proc example*(_: type Ack): Ack =
   let tx1, tx2 = Transaction.example
-  !Ack.init([tx1.hash, tx2.hash])
+  let validator = PublicKey.example
+  !Ack.init([tx1.hash, tx2.hash], validator)
