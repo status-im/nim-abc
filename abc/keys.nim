@@ -13,6 +13,10 @@ func `==`*(a, b: PrivateKey): bool {.borrow.}
 func `==`*(a, b: PublicKey): bool {.borrow.}
 func `==`*(a, b: Signature): bool {.borrow.}
 
+func `$`*(s: PrivateKey): string {.error: "Private keys should not be printed".}
+func `$`*(s: PublicKey): string {.borrow.}
+func `$`*(s: Signature): string {.borrow.}
+
 proc random*(_: type PrivateKey): PrivateKey =
   var seed = newSeq[byte](64)
   doAssert randomBytes(seed) == seed.len
