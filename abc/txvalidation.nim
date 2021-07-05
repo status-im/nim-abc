@@ -4,7 +4,7 @@ func checkValue(store: TxStore, transaction: Transaction): bool =
   var valueIn, valueOut = 0.u256
 
   for (hash, owner) in transaction.inputs:
-    for output in store[hash].outputs:
+    for output in store.getTx(hash).outputs:
       if output.owner == owner:
         valueIn += output.value
 
@@ -20,7 +20,7 @@ func hasValidTx*(store: TxStore, txHash: Hash): bool =
   if not store.hasTx(txHash):
     return false
 
-  let transaction = store[txHash]
+  let transaction = store.getTx(txHash)
 
   if not transaction.hasValidSignature:
     return false
