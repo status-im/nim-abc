@@ -1,3 +1,4 @@
+import pkg/questionable
 import ./txstore
 
 func checkValue(store: TxStore, transaction: Transaction): bool =
@@ -30,3 +31,22 @@ func hasValidTx*(store: TxStore, txHash: Hash): bool =
       return false
 
   store.checkValue(transaction)
+
+func hasValidAck*(store: TxStore, ackHash: Hash): bool =
+  if not store.hasAck(ackHash):
+    return false
+
+  let ack = store.getAck(ackHash)
+
+  if not ack.hasValidSignature:
+    return false
+
+  if previous =? ack.previous:
+    if not store.hasValidAck(previous):
+      return false
+
+  for transaction in ack.transactions:
+    if not store.hasValidTx(transaction):
+      return false
+
+  true
