@@ -1,8 +1,10 @@
 import ./keys
 import ./transactions
+import ./acks
 
 export keys
 export transactions
+export acks
 
 type
   Wallet* = object
@@ -16,3 +18,6 @@ func id*(wallet: Wallet): PublicKey =
 
 func sign*(wallet: Wallet, transaction: var Transaction) =
   wallet.key.sign(transaction)
+
+func sign*(wallet: Wallet, ack: var Ack) =
+  wallet.key.sign(ack)
