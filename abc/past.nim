@@ -1,24 +1,28 @@
 import ./txstore
 
-func past(store: TxStore, txHash: TxHash, accumulator: var seq[TxHash]) =
+type
+  History* = object
+    transactions*: seq[TxHash]
+
+func past(store: TxStore, txHash: TxHash, history: var History) =
   if transaction =? store[txHash]:
     for (hash, _) in transaction.inputs:
-      if not accumulator.contains hash:
-        accumulator.add(hash)
-        store.past(hash, accumulator)
+      if not history.transactions.contains hash:
+        history.transactions.add(hash)
+        store.past(hash, history)
 
-func past(store: TxStore, ackHash: AckHash, accumulator: var seq[TxHash]) =
+func past(store: TxStore, ackHash: AckHash, history: var History) =
   if ack =? store[ackHash]:
     if previous =? ack.previous:
-      store.past(previous, accumulator)
+      store.past(previous, history)
     for txHash in ack.transactions:
-      if not accumulator.contains txHash:
-        accumulator.add(txHash)
-        store.past(txHash, accumulator)
+      if not history.transactions.contains txHash:
+        history.transactions.add(txHash)
+        store.past(txHash, history)
 
-func past*(store: TxStore, hash: TxHash|AckHash): seq[TxHash] =
+func past*(store: TxStore, hash: TxHash|AckHash): History =
   store.past(hash, result)
 
-func past*(store: TxStore, hashes: varargs[AckHash]): seq[TxHash] =
+func past*(store: TxStore, hashes: varargs[AckHash]): History =
   for hash in hashes:
     store.past(hash, result)
