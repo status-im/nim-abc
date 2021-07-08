@@ -107,3 +107,11 @@ suite "Acknowledgement validation":
     store.add(bad1, bad2)
     check not store.hasValidAck(bad1.hash)
     check not store.hasValidAck(bad2.hash)
+
+  test "checks validity of a set of acknowledgements":
+    var store = TxStore.init(genesis)
+    store.add(tx1, tx2)
+    store.add(ack2)
+    check not store.hasValidAcks(ack1.hash, ack2.hash)
+    store.add(ack1)
+    check store.hasValidAcks(ack1.hash, ack2.hash)

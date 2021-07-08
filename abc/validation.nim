@@ -47,3 +47,9 @@ func hasValidAck*(store: TxStore, ackHash: AckHash): bool =
       return false
 
   true
+
+func hasValidAcks*(store: TxStore, hashes: varargs[AckHash]): bool =
+  for hash in hashes:
+    if not store.hasValidAck(hash):
+      return false
+  true
