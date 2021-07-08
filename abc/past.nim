@@ -1,11 +1,11 @@
 import ./txstore
 
-func past*(store: TxStore, txHash: Hash, accumulator: var seq[Hash]) =
+func past*(store: TxStore, txHash: TxHash, accumulator: var seq[TxHash]) =
   if transaction =? store.getTx(txHash):
     for (hash, _) in transaction.inputs:
       if not accumulator.contains hash:
         accumulator.add(hash)
         store.past(hash, accumulator)
 
-func past*(store: TxStore, txHash: Hash): seq[Hash] =
+func past*(store: TxStore, txHash: TxHash): seq[TxHash] =
   store.past(txHash, result)

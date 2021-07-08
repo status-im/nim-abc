@@ -18,7 +18,7 @@ type
     validator: PublicKey
     signature: Signature
   TxInput* = tuple
-    transaction: Hash
+    transaction: TxHash
     owner: PublicKey
   TxOutput* = tuple
     owner: PublicKey
@@ -67,8 +67,8 @@ func toBytes*(transaction: Transaction): seq[byte] =
     result.add(value.toBytes)
   result.add(transaction.validator.toBytes)
 
-func hash*(transaction: Transaction): Hash =
-  hash(transaction.toBytes)
+func hash*(transaction: Transaction): TxHash =
+  TxHash.hash(transaction.toBytes)
 
 func sign*(key: PrivateKey, transaction: var Transaction) =
   transaction.add(key.sign(transaction.hash.toBytes))

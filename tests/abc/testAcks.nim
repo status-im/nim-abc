@@ -11,7 +11,7 @@ suite "Acknowledgements":
     let ack = Ack.init([tx1.hash, tx2.hash], victor)
     check ack.isSome
     check ack.?transactions == @[tx1.hash, tx2.hash].some
-    check ack.?previous == Hash.none
+    check ack.?previous == AckHash.none
     check ack.?validator == victor.some
 
   test "an acknowledgement has a hash":

@@ -15,7 +15,7 @@ func checkValue(store: TxStore, transaction: Transaction): bool =
 
   valueIn == valueOut
 
-func hasValidTx*(store: TxStore, txHash: Hash): bool =
+func hasValidTx*(store: TxStore, txHash: TxHash): bool =
   if txHash == store.genesis:
     return true
 
@@ -31,7 +31,7 @@ func hasValidTx*(store: TxStore, txHash: Hash): bool =
 
   store.checkValue(transaction)
 
-func hasValidAck*(store: TxStore, ackHash: Hash): bool =
+func hasValidAck*(store: TxStore, ackHash: AckHash): bool =
   without ack =? store.getAck(ackHash):
     return false
 
