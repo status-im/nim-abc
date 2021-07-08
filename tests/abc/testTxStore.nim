@@ -10,16 +10,16 @@ suite "Transaction Store":
 
   test "is initialized with a genesis transaction":
     let store = TxStore.init(genesis)
-    check store.getTx(genesis.hash) == genesis.some
+    check store[genesis.hash] == genesis.some
 
   test "stores transactions":
     var store = TxStore.init(genesis)
-    check store.getTx(transaction.hash).isNone
+    check store[transaction.hash].isNone
     store.add(transaction)
-    check store.getTx(transaction.hash) == transaction.some
+    check store[transaction.hash] == transaction.some
 
   test "stores acks":
     var store = TxStore.init(genesis)
-    check store.getAck(ack.hash).isNone
+    check store[ack.hash].isNone
     store.add(ack)
-    check store.getAck(ack.hash) == ack.some
+    check store[ack.hash] == ack.some

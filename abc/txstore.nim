@@ -28,8 +28,8 @@ func init*(_: type TxStore, genesis: Transaction): TxStore =
 func genesis*(store: TxStore): TxHash =
   store.genesis
 
-func getTx*(store: TxStore, hash: TxHash): ?Transaction =
+func `[]`*(store: TxStore, hash: TxHash): ?Transaction =
   store.transactions.?[hash]
 
-func getAck*(store: TxStore, hash: AckHash): ?Ack =
+func `[]`*(store: TxStore, hash: AckHash): ?Ack =
   store.acks.?[hash]

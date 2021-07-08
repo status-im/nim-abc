@@ -5,7 +5,7 @@ func checkValue(store: TxStore, transaction: Transaction): bool =
   var valueIn, valueOut = 0.u256
 
   for (hash, owner) in transaction.inputs:
-    if inputTx =? store.getTx(hash):
+    if inputTx =? store[hash]:
       for output in inputTx.outputs:
         if output.owner == owner:
           valueIn += output.value
@@ -19,7 +19,7 @@ func hasValidTx*(store: TxStore, txHash: TxHash): bool =
   if txHash == store.genesis:
     return true
 
-  without transaction =? store.getTx(txHash):
+  without transaction =? store[txHash]:
     return false
 
   if not transaction.hasValidSignature:
@@ -32,7 +32,7 @@ func hasValidTx*(store: TxStore, txHash: TxHash): bool =
   store.checkValue(transaction)
 
 func hasValidAck*(store: TxStore, ackHash: AckHash): bool =
-  without ack =? store.getAck(ackHash):
+  without ack =? store[ackHash]:
     return false
 
   if not ack.hasValidSignature:
