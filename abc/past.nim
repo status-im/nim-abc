@@ -18,3 +18,7 @@ func past(store: TxStore, ackHash: AckHash, accumulator: var seq[TxHash]) =
 
 func past*(store: TxStore, hash: TxHash|AckHash): seq[TxHash] =
   store.past(hash, result)
+
+func past*(store: TxStore, hashes: varargs[AckHash]): seq[TxHash] =
+  for hash in hashes:
+    store.past(hash, result)
