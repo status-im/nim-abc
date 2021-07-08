@@ -1,14 +1,17 @@
+import std/sets
 import ./txstore
+
+export sets
 
 type
   History* = object
-    transactions*: seq[TxHash]
+    transactions*: HashSet[TxHash]
 
 func past(store: TxStore, txHash: TxHash, history: var History) =
   if transaction =? store[txHash]:
     for (hash, _) in transaction.inputs:
       if not history.transactions.contains hash:
-        history.transactions.add(hash)
+        history.transactions.incl(hash)
         store.past(hash, history)
 
 func past(store: TxStore, ackHash: AckHash, history: var History) =
@@ -17,7 +20,7 @@ func past(store: TxStore, ackHash: AckHash, history: var History) =
       store.past(previous, history)
     for txHash in ack.transactions:
       if not history.transactions.contains txHash:
-        history.transactions.add(txHash)
+        history.transactions.incl(txHash)
         store.past(txHash, history)
 
 func past*(store: TxStore, hash: TxHash|AckHash): History =

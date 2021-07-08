@@ -24,33 +24,33 @@ suite "Past transactions and acknowledgements":
     ack2 = !Ack.init([tx2.hash], victor)
     ack3 = !Ack.init(ack1.hash, [tx2.hash, tx3.hash], victor)
 
+  func set(transactions: varargs[TxHash]): HashSet[TxHash] =
+    transactions.toHashSet
+
   test "finds all transactions that precede a transaction":
     var store = TxStore.init(genesis)
     store.add(tx1, tx2, tx3)
-    check store.past(tx1.hash).transactions == [genesis.hash]
-    check store.past(tx2.hash).transactions == [genesis.hash]
-    check store.past(tx3.hash).transactions == [
-      tx1.hash, genesis.hash, tx2.hash
-    ]
+    check store.past(tx1.hash).transactions == set(genesis.hash)
+    check store.past(tx2.hash).transactions == set(genesis.hash)
+    check store.past(tx3.hash).transactions ==
+      set(genesis.hash, tx1.hash, tx2.hash)
 
   test "past is empty when transaction cannot be found":
     let store = TxStore.init(genesis)
-    check store.past(tx1.hash).transactions == []
+    check store.past(tx1.hash).transactions == set()
 
   test "finds all transactions that precede an acknowledgement":
     var store = TxStore.init(genesis)
     store.add(tx1, tx2, tx3)
     store.add(ack1, ack2, ack3)
-    check store.past(ack1.hash).transactions == [tx1.hash, genesis.hash]
-    check store.past(ack2.hash).transactions == [tx2.hash, genesis.hash]
-    check store.past(ack3.hash).transactions == [
-      tx1.hash, genesis.hash, tx2.hash, tx3.hash
-    ]
+    check store.past(ack1.hash).transactions == set(genesis.hash, tx1.hash)
+    check store.past(ack2.hash).transactions == set(genesis.hash, tx2.hash)
+    check store.past(ack3.hash).transactions ==
+      set(genesis.hash, tx1.hash, tx2.hash, tx3.hash)
 
   test "finds all transactions that precede a set of acknowledgements":
     var store = TxStore.init(genesis)
     store.add(tx1, tx2, tx3)
     store.add(ack1, ack2, ack3)
-    check store.past(ack1.hash, ack2.hash).transactions == [
-      tx1.hash, genesis.hash, tx2.hash
-    ]
+    check store.past(ack1.hash, ack2.hash).transactions ==
+      set(genesis.hash, tx1.hash, tx2.hash)
