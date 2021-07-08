@@ -1,5 +1,5 @@
 import abc/txstore
-import abc/past
+import abc/history
 import ./basics
 import ./alicebob
 
