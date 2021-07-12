@@ -62,6 +62,14 @@ suite "Past transactions and acknowledgements":
     check store.past(ack1.hash, ack2.hash).transactions ==
       set(genesis.hash, tx1.hash, tx2.hash)
 
+  test "past contains the genesis hash":
+    var store = TxStore.init(genesis)
+    store.add(tx1, tx3)
+    store.add(ack3)
+    check store.past(tx1.hash).genesis == store.genesis
+    check store.past(tx3.hash).genesis == store.genesis
+    check store.past(ack3.hash).genesis == store.genesis
+
 suite "Transaction validation":
 
   let alice = PublicKey.alice

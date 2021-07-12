@@ -5,6 +5,7 @@ export sets
 
 type
   History* = object
+    genesis*: TxHash
     transactions*: HashSet[TxHash]
     missingTx*: HashSet[TxHash]
     missingAck*: HashSet[AckHash]
@@ -55,9 +56,11 @@ func past(store: TxStore, ackHash: AckHash, history: var History) =
     history.missingAck.incl(ackHash)
 
 func past*(store: TxStore, hash: TxHash|AckHash): History =
+  result.genesis = store.genesis
   store.past(hash, result)
 
 func past*(store: TxStore, hashes: varargs[AckHash]): History =
+  result.genesis = store.genesis
   for hash in hashes:
     store.past(hash, result)
 
