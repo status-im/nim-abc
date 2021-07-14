@@ -46,7 +46,6 @@ func past(store: TxStore, txHash: TxHash, history: var History) =
 
   if not transaction.hasValidSignature or not store.checkValue(transaction):
     history.invalidTx.incl(txHash)
-    return
 
   for hash in store.next(history, transaction):
     history.transactions.incl(hash)
@@ -59,7 +58,6 @@ func past(store: TxStore, ackHash: AckHash, history: var History) =
 
   if not ack.hasValidSignature:
     history.invalidAck.incl(ackHash)
-    return
 
   if previous =? ack.previous:
     store.past(previous, history)

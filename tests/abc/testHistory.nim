@@ -3,6 +3,9 @@ import abc/history
 import ./basics
 import ./alicebob
 
+func set[T](elements: varargs[T]): HashSet[T] =
+  elements.toHashSet
+
 suite "Past transactions and acknowledgements":
 
   let genesis = Transaction.genesis
@@ -31,9 +34,6 @@ suite "Past transactions and acknowledgements":
     PrivateKey.victor.sign(ack2)
     PrivateKey.victor.sign(ack3)
 
-  func set(transactions: varargs[TxHash]): HashSet[TxHash] =
-    transactions.toHashSet
-
   test "finds all transactions that precede a transaction":
     var store = TxStore.init(genesis)
     store.add(tx1, tx2, tx3)
@@ -44,7 +44,7 @@ suite "Past transactions and acknowledgements":
 
   test "past is empty when transaction cannot be found":
     let store = TxStore.init(genesis)
-    check store.past(tx1.hash).transactions == set()
+    check store.past(tx1.hash).transactions == set[TxHash]()
 
   test "finds all transactions that precede an acknowledgement":
     var store = TxStore.init(genesis)
@@ -94,7 +94,9 @@ suite "Transaction validation":
   test "checks that no input is missing":
     var store = TxStore.init(genesis)
     store.add(tx2) # tx2 depends on tx1, which is missing
-    check not isValid store.past(tx2.hash)
+    let past = store.past(tx2.hash)
+    check not isValid past
+    check past.missingTx == set(tx1.hash)
 
   test "checks that inputs and outputs match":
     var store = TxStore.init(genesis)
@@ -103,8 +105,10 @@ suite "Transaction validation":
     PrivateKey.alice.sign(bad1)
     PrivateKey.bob.sign(bad2)
     store.add(bad1, bad2)
-    check not isValid store.past(bad1.hash)
-    check not isValid store.past(bad2.hash)
+    for transaction in [bad1, bad2]:
+      let past = store.past(transaction.hash)
+      check not isValid past
+      check past.invalidTx == set(bad1.hash)
 
   test "checks that signatures match":
     var store = TxStore.init(genesis)
@@ -113,8 +117,10 @@ suite "Transaction validation":
     PrivateKey.bob.sign(bad1) # invalid signature, should be signed by alice
     PrivateKey.bob.sign(bad2)
     store.add(bad1, bad2)
-    check not isValid store.past(bad1.hash)
-    check not isValid store.past(bad2.hash)
+    for transaction in [bad1, bad2]:
+      let past = store.past(transaction.hash)
+      check not isValid past
+      check past.invalidTx == set(bad1.hash)
 
 suite "Acknowledgement validation":
 
@@ -146,13 +152,17 @@ suite "Acknowledgement validation":
     var store = TxStore.init(genesis)
     store.add(tx1, tx2)
     store.add(ack2) # ack2 depends on ack1, which is missing
-    check not isValid store.past(ack2.hash)
+    let past = store.past(ack2.hash)
+    check not isValid past
+    check past.missingAck == set(ack1.hash)
 
   test "checks that no transaction is missing":
     var store = TxStore.init(genesis)
     store.add(tx2) # tx2 depends on tx1, which is missing
     store.add(ack1, ack2)
-    check not isValid store.past(ack2.hash)
+    let past = store.past(ack2.hash)
+    check not isValid past
+    check past.missingTx == set(tx1.hash)
 
   test "checks that no transaction is invalid":
     var store = TxStore.init(genesis)
@@ -162,7 +172,9 @@ suite "Acknowledgement validation":
     PrivateKey.victor.sign(ack)
     store.add(bad)
     store.add(ack)
-    check not isValid store.past(ack.hash)
+    let past = store.past(ack.hash)
+    check not isValid past
+    check past.invalidTx == set(bad.hash)
 
   test "checks that signatures match":
     var store = TxStore.init(genesis)
@@ -172,8 +184,10 @@ suite "Acknowledgement validation":
     PrivateKey.victor.sign(bad2)
     store.add(tx1, tx2)
     store.add(bad1, bad2)
-    check not isValid store.past(bad1.hash)
-    check not isValid store.past(bad2.hash)
+    for ack in [bad1, bad2]:
+      let past = store.past(ack.hash)
+      check not isValid past
+      check past.invalidAck == set(bad1.hash)
 
   test "checks validity of a set of acknowledgements":
     var store = TxStore.init(genesis)
