@@ -26,34 +26,47 @@ func checkValue(store: TxStore, transaction: Transaction): bool =
 
   valueIn == valueOut
 
+func next(store: TxStore, history: History, transaction: Transaction): seq[TxHash] =
+  for (hash, _) in transaction.inputs:
+    if not history.transactions.contains(hash):
+      result.add(hash)
+
+func next(store: TxStore, history: History, ack: Ack): seq[TxHash] =
+  for hash in ack.transactions:
+    if not history.transactions.contains(hash):
+      result.add(hash)
+
 func past(store: TxStore, txHash: TxHash, history: var History) =
   if txHash == store.genesis:
     return
 
-  if transaction =? store[txHash]:
-    if transaction.hasValidSignature and store.checkValue(transaction):
-      for (hash, _) in transaction.inputs:
-        if not history.transactions.contains hash:
-          history.transactions.incl(hash)
-          store.past(hash, history)
-    else:
-      history.invalidTx.incl(txHash)
-  else:
+  without transaction =? store[txHash]:
     history.missingTx.incl(txHash)
+    return
+
+  if not transaction.hasValidSignature or not store.checkValue(transaction):
+    history.invalidTx.incl(txHash)
+    return
+
+  for hash in store.next(history, transaction):
+    history.transactions.incl(hash)
+    store.past(hash, history)
 
 func past(store: TxStore, ackHash: AckHash, history: var History) =
-  if ack =? store[ackHash]:
-    if ack.hasValidSignature:
-      if previous =? ack.previous:
-        store.past(previous, history)
-      for txHash in ack.transactions:
-        if not history.transactions.contains txHash:
-          history.transactions.incl(txHash)
-          store.past(txHash, history)
-    else:
-      history.invalidAck.incl(ackHash)
-  else:
+  without ack =? store[ackHash]:
     history.missingAck.incl(ackHash)
+    return
+
+  if not ack.hasValidSignature:
+    history.invalidAck.incl(ackHash)
+    return
+
+  if previous =? ack.previous:
+    store.past(previous, history)
+
+  for txHash in store.next(history, ack):
+    history.transactions.incl(txHash)
+    store.past(txHash, history)
 
 func past*(store: TxStore, hash: TxHash|AckHash): History =
   result.genesis = store.genesis
