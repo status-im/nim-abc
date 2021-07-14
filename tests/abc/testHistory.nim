@@ -12,10 +12,12 @@ suite "Past transactions and acknowledgements":
   let alice = PublicKey.alice
   let bob = PublicKey.bob
   let victor = PublicKey.victor
+  var store: TxStore
   var tx1, tx2, tx3: Transaction
   var ack1, ack2, ack3: Ack
 
   setup:
+    store = TxStore.new(genesis)
     tx1 = !Transaction.init({genesis.hash: alice}, {bob: 100.u256}, victor)
     tx2 = !Transaction.init({genesis.hash: bob}, {alice: 100.u256}, victor)
     tx3 = !Transaction.init(
@@ -35,7 +37,6 @@ suite "Past transactions and acknowledgements":
     PrivateKey.victor.sign(ack3)
 
   test "finds all transactions that precede a transaction":
-    var store = TxStore.init(genesis)
     store.add(tx1, tx2, tx3)
     check store.past(tx1.hash).transactions == set(genesis.hash)
     check store.past(tx2.hash).transactions == set(genesis.hash)
@@ -43,11 +44,9 @@ suite "Past transactions and acknowledgements":
       set(genesis.hash, tx1.hash, tx2.hash)
 
   test "past is empty when transaction cannot be found":
-    let store = TxStore.init(genesis)
     check store.past(tx1.hash).transactions == set[TxHash]()
 
   test "finds all transactions that precede an acknowledgement":
-    var store = TxStore.init(genesis)
     store.add(tx1, tx2, tx3)
     store.add(ack1, ack2, ack3)
     check store.past(ack1.hash).transactions == set(genesis.hash, tx1.hash)
@@ -56,14 +55,12 @@ suite "Past transactions and acknowledgements":
       set(genesis.hash, tx1.hash, tx2.hash, tx3.hash)
 
   test "finds all transactions that precede a set of acknowledgements":
-    var store = TxStore.init(genesis)
     store.add(tx1, tx2, tx3)
     store.add(ack1, ack2, ack3)
     check store.past(ack1.hash, ack2.hash).transactions ==
       set(genesis.hash, tx1.hash, tx2.hash)
 
   test "past contains the genesis hash":
-    var store = TxStore.init(genesis)
     store.add(tx1, tx3)
     store.add(ack3)
     check store.past(tx1.hash).genesis == store.genesis
@@ -76,30 +73,29 @@ suite "Transaction validation":
   let bob = PublicKey.bob
   let victor = PublicKey.victor
   let genesis = Transaction.genesis
+  var store: TxStore
   var tx1, tx2: Transaction
 
   setup:
+    store = TxStore.new(genesis)
     tx1 = !Transaction.init({genesis.hash: alice}, {bob: 100.u256}, victor)
     tx2 = !Transaction.init({tx1.hash: bob}, {alice: 100.u256}, victor)
     PrivateKey.alice.sign(tx1)
     PrivateKey.bob.sign(tx2)
 
   test "checks validity of transactions":
-    var store = TxStore.init(genesis)
     store.add(tx1, tx2)
     check isValid store.past(genesis.hash)
     check isValid store.past(tx1.hash)
     check isValid store.past(tx2.hash)
 
   test "checks that no input is missing":
-    var store = TxStore.init(genesis)
     store.add(tx2) # tx2 depends on tx1, which is missing
     let past = store.past(tx2.hash)
     check not isValid past
     check past.missingTx == set(tx1.hash)
 
   test "checks that inputs and outputs match":
-    var store = TxStore.init(genesis)
     var bad1 = !Transaction.init({genesis.hash: alice}, {bob: 999.u256}, victor)
     var bad2 = !Transaction.init({bad1.hash: bob}, {alice: 999.u256}, victor)
     PrivateKey.alice.sign(bad1)
@@ -111,7 +107,6 @@ suite "Transaction validation":
       check past.invalidTx == set(bad1.hash)
 
   test "checks that signatures match":
-    var store = TxStore.init(genesis)
     var bad1 = !Transaction.init({genesis.hash: alice}, {bob: 100.u256}, victor)
     var bad2 = !Transaction.init({bad1.hash: bob}, {alice: 100.u256}, victor)
     PrivateKey.bob.sign(bad1) # invalid signature, should be signed by alice
@@ -128,10 +123,12 @@ suite "Acknowledgement validation":
   let bob = PublicKey.bob
   let victor = PublicKey.victor
   let genesis = Transaction.genesis
+  var store: TxStore
   var tx1, tx2: Transaction
   var ack1, ack2: Ack
 
   setup:
+    store = TxStore.new(genesis)
     tx1 = !Transaction.init({genesis.hash: alice}, {bob: 100.u256}, victor)
     tx2 = !Transaction.init({tx1.hash: bob}, {alice: 100.u256}, victor)
     ack1 = !Ack.init([tx1.hash], victor)
@@ -142,14 +139,12 @@ suite "Acknowledgement validation":
     PrivateKey.victor.sign(ack2)
 
   test "checks validity of acknowledgements":
-    var store = TxStore.init(genesis)
     store.add(tx1, tx2)
     store.add(ack1, ack2)
     check isValid store.past(ack1.hash)
     check isValid store.past(ack2.hash)
 
   test "checks that no previous acknowledgement is missing":
-    var store = TxStore.init(genesis)
     store.add(tx1, tx2)
     store.add(ack2) # ack2 depends on ack1, which is missing
     let past = store.past(ack2.hash)
@@ -157,7 +152,6 @@ suite "Acknowledgement validation":
     check past.missingAck == set(ack1.hash)
 
   test "checks that no transaction is missing":
-    var store = TxStore.init(genesis)
     store.add(tx2) # tx2 depends on tx1, which is missing
     store.add(ack1, ack2)
     let past = store.past(ack2.hash)
@@ -165,7 +159,6 @@ suite "Acknowledgement validation":
     check past.missingTx == set(tx1.hash)
 
   test "checks that no transaction is invalid":
-    var store = TxStore.init(genesis)
     var bad = !Transaction.init({genesis.hash: alice}, {bob: 999.u256}, victor)
     var ack = !Ack.init([bad.hash], victor)
     PrivateKey.alice.sign(bad)
@@ -177,7 +170,6 @@ suite "Acknowledgement validation":
     check past.invalidTx == set(bad.hash)
 
   test "checks that signatures match":
-    var store = TxStore.init(genesis)
     var bad1 = !Ack.init([tx1.hash], victor)
     var bad2 = !Ack.init(bad1.hash, [tx2.hash], victor)
     PrivateKey.bob.sign(bad1) # invalid signature, should be signed by victor
@@ -190,7 +182,6 @@ suite "Acknowledgement validation":
       check past.invalidAck == set(bad1.hash)
 
   test "checks validity of a set of acknowledgements":
-    var store = TxStore.init(genesis)
     store.add(tx1, tx2)
     store.add(ack2)
     check not isValid store.past(ack1.hash, ack2.hash)
