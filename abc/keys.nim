@@ -1,5 +1,6 @@
 import std/sugar
 import std/sequtils
+import std/hashes
 import pkg/blscurve as bls
 import pkg/nimcrypto
 import pkg/questionable
@@ -61,3 +62,6 @@ func fromBytes*(_: type PublicKey, bytes: openArray[byte]): ?PublicKey =
     PublicKey(key).some
   else:
     PublicKey.none
+
+func hash*(key: PublicKey): Hash =
+  key.toBytes.hash
