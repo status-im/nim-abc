@@ -1,7 +1,7 @@
 import pkg/questionable
 import abc
 
-let a, b, v = PrivateKey.random
+let a, b, v1, v2 = PrivateKey.random
 
 proc alice*(_: type PrivateKey): PrivateKey =
   a
@@ -10,16 +10,22 @@ proc bob*(_: type PrivateKey): PrivateKey =
   b
 
 proc victor*(_: type PrivateKey): PrivateKey =
-  v
+  v1
+
+proc vanna*(_: type PrivateKey): PrivateKey =
+  v2
 
 proc alice*(_: type PublicKey): PublicKey =
-  a.toPublicKey
+  PrivateKey.alice.toPublicKey
 
 proc bob*(_: type PublicKey): PublicKey =
-  b.toPublicKey
+  PrivateKey.bob.toPublicKey
 
 proc victor*(_: type PublicKey): PublicKey =
-  v.toPublicKey
+  PrivateKey.victor.toPublicKey
+
+proc vanna*(_: type PublicKey): PublicKey =
+  PrivateKey.vanna.toPublicKey
 
 proc genesis*(_: type Transaction): Transaction =
   let alice = PublicKey.alice
