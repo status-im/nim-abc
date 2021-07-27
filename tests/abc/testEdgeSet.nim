@@ -1,4 +1,5 @@
 import std/sequtils
+import std/random
 import abc/dag/edgeset
 import ./basics
 
@@ -40,3 +41,14 @@ suite "DAG edge set":
     check neighboursC.len == 2
     check "a" in neighboursB
     check "a" in neighboursC and "b" in neighboursC
+
+  test "works for large sets":
+    var large = EdgeSet[int].init
+    for _ in 0..10_000:
+      let x, y = rand(100)
+      if x != y:
+        let (x, y) = (min(x,y), max(x,y))
+        large.incl((x,y))
+        check (x, y) in large
+        check y in toSeq large.outgoing(x)
+        check x in toSeq large.incoming(y)
