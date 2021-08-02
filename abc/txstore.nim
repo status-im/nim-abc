@@ -5,9 +5,9 @@ import ./acks
 
 type
   TxStore* = ref object
-    genesis: TxHash
-    transactions: Table[TxHash, Transaction]
-    acks: Table[AckHash, Ack]
+    genesis: Hash
+    transactions: Table[Hash, Transaction]
+    acks: Table[Hash, Ack]
 
 export questionable
 export transactions
@@ -26,11 +26,13 @@ func new*(_: type TxStore, genesis: Transaction): TxStore =
   store.add(genesis)
   store
 
-func genesis*(store: TxStore): TxHash =
+func genesis*(store: TxStore): Hash =
   store.genesis
 
-func `[]`*(store: TxStore, hash: TxHash): ?Transaction =
+func getTransaction*(store: TxStore, hash: Hash): ?Transaction =
+  doAssert hash.kind == HashKind.Tx
   store.transactions.?[hash]
 
-func `[]`*(store: TxStore, hash: AckHash): ?Ack =
+func getAck*(store: TxStore, hash: Hash): ?Ack =
+  doAssert hash.kind == HashKind.Ack
   store.acks.?[hash]

@@ -18,7 +18,7 @@ type
     validator: PublicKey
     signature: Signature
   TxInput* = tuple
-    transaction: TxHash
+    transaction: Hash
     owner: PublicKey
   TxOutput* = tuple
     owner: PublicKey
@@ -33,6 +33,10 @@ func init*(_: type Transaction,
 
   if outputs.map(output => output.owner).hasDuplicates:
     return none Transaction
+
+  for input in inputs:
+    if input.transaction.kind != HashKind.Tx:
+      return none Transaction
 
   some Transaction(inputs: @inputs, outputs: @outputs, validator: validator)
 
@@ -67,8 +71,8 @@ func toBytes*(transaction: Transaction): seq[byte] =
     result.add(value.toBytes)
   result.add(transaction.validator.toBytes)
 
-func hash*(transaction: Transaction): TxHash =
-  TxHash.hash(transaction.toBytes)
+func hash*(transaction: Transaction): Hash =
+  hash(transaction.toBytes, HashKind.Tx)
 
 func sign*(key: PrivateKey, transaction: var Transaction) =
   transaction.add(key.sign(transaction.hash.toBytes))

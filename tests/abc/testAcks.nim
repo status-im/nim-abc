@@ -11,7 +11,7 @@ suite "Acknowledgements":
     let ack = Ack.init([tx1.hash, tx2.hash], victor)
     check ack.isSome
     check ack.?transactions == @[tx1.hash, tx2.hash].some
-    check ack.?previous == AckHash.none
+    check ack.?previous == Hash.none
     check ack.?validator == victor.some
 
   test "an acknowledgement has a hash":
@@ -62,3 +62,12 @@ suite "Acknowledgements":
   test "an acknowledgement must contain at least one transaction":
     let previous = Ack.example
     check Ack.init(previous.hash, [], victor).isNone
+
+  test "previous acknowledgement must have correct hash type":
+    let transaction = Transaction.example
+    let invalidPrevious = Transaction.example
+    check Ack.init(invalidPrevious.hash, [transaction.hash], victor).isNone
+
+  test "acknowledged transactions must have correct hash type":
+    let invalidTransaction = Ack.example
+    check Ack.init([invalidTransaction.hash], victor).isNone

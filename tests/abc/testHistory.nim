@@ -44,7 +44,7 @@ suite "Past transactions and acknowledgements":
       set(genesis.hash, tx1.hash, tx2.hash)
 
   test "past is empty when transaction cannot be found":
-    check store.past(tx1.hash).transactions == set[TxHash]()
+    check store.past(tx1.hash).transactions == set[Hash]()
 
   test "finds all transactions that precede an acknowledgement":
     store.add(tx1, tx2, tx3)
@@ -93,7 +93,7 @@ suite "Transaction validation":
     store.add(tx2) # tx2 depends on tx1, which is missing
     let past = store.past(tx2.hash)
     check not isValid past
-    check past.missingTx == set(tx1.hash)
+    check past.missing == set(tx1.hash)
 
   test "checks that inputs and outputs match":
     var bad1 = !Transaction.init({genesis.hash: alice}, {bob: 999.u256}, victor)
@@ -104,7 +104,7 @@ suite "Transaction validation":
     for transaction in [bad1, bad2]:
       let past = store.past(transaction.hash)
       check not isValid past
-      check past.invalidTx == set(bad1.hash)
+      check past.invalid == set(bad1.hash)
 
   test "checks that signatures match":
     var bad1 = !Transaction.init({genesis.hash: alice}, {bob: 100.u256}, victor)
@@ -115,7 +115,7 @@ suite "Transaction validation":
     for transaction in [bad1, bad2]:
       let past = store.past(transaction.hash)
       check not isValid past
-      check past.invalidTx == set(bad1.hash)
+      check past.invalid == set(bad1.hash)
 
 suite "Acknowledgement validation":
 
@@ -149,14 +149,14 @@ suite "Acknowledgement validation":
     store.add(ack2) # ack2 depends on ack1, which is missing
     let past = store.past(ack2.hash)
     check not isValid past
-    check past.missingAck == set(ack1.hash)
+    check past.missing == set(ack1.hash)
 
   test "checks that no transaction is missing":
     store.add(tx2) # tx2 depends on tx1, which is missing
     store.add(ack1, ack2)
     let past = store.past(ack2.hash)
     check not isValid past
-    check past.missingTx == set(tx1.hash)
+    check past.missing == set(tx1.hash)
 
   test "checks that no transaction is invalid":
     var bad = !Transaction.init({genesis.hash: alice}, {bob: 999.u256}, victor)
@@ -167,7 +167,7 @@ suite "Acknowledgement validation":
     store.add(ack)
     let past = store.past(ack.hash)
     check not isValid past
-    check past.invalidTx == set(bad.hash)
+    check past.invalid == set(bad.hash)
 
   test "checks that signatures match":
     var bad1 = !Ack.init([tx1.hash], victor)
@@ -179,7 +179,7 @@ suite "Acknowledgement validation":
     for ack in [bad1, bad2]:
       let past = store.past(ack.hash)
       check not isValid past
-      check past.invalidAck == set(bad1.hash)
+      check past.invalid == set(bad1.hash)
 
   test "checks validity of a set of acknowledgements":
     store.add(tx1, tx2)

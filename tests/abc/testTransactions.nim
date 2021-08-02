@@ -82,3 +82,7 @@ suite "Transactions":
 
   test "multiple outputs to the same owner are not allowed":
     check Transaction.init({alice: 40.u256, alice: 2.u256}, victor).isNone
+
+  test "inputs must have correct hash kind":
+    let invalid = Ack.example
+    check Transaction.init({invalid.hash: alice}, {bob: 1.u256}, victor).isNone

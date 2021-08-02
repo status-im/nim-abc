@@ -7,33 +7,40 @@ export keys
 
 type
   Ack* = object
-    previous: ?AckHash
-    transactions: seq[TxHash]
+    previous: ?Hash
+    transactions: seq[Hash]
     validator: PublicKey
     signature: ?Signature
 
 func init*(_: type Ack,
-           transactions: openArray[TxHash],
+           transactions: openArray[Hash],
            validator: PublicKey): ?Ack =
   if transactions.len == 0:
     return none Ack
 
+  for transaction in transactions:
+    if transaction.kind != HashKind.Tx:
+      return none Ack
+
   some Ack(transactions: @transactions, validator: validator)
 
 func init*(_: type Ack,
-           previous: AckHash,
-           transactions: openArray[TxHash],
+           previous: Hash,
+           transactions: openArray[Hash],
            validator: PublicKey): ?Ack =
+  if previous.kind != HashKind.Ack:
+    return none Ack
+
   without var ack =? Ack.init(transactions, validator):
     return none Ack
 
   ack.previous = previous.some
   some ack
 
-func previous*(ack: Ack): ?AckHash =
+func previous*(ack: Ack): ?Hash =
   ack.previous
 
-func transactions*(ack: Ack): seq[TxHash] =
+func transactions*(ack: Ack): seq[Hash] =
   ack.transactions
 
 func validator*(ack: Ack): PublicKey =
@@ -46,15 +53,15 @@ func `signature=`*(ack: var Ack, signature: Signature) =
   ack.signature = signature.some
 
 func toBytes*(ack: Ack): seq[byte] =
-  let previous = ack.previous |? AckHash.default
+  let previous = ack.previous |? Hash.default
   result.add(previous.toBytes)
   result.add(ack.transactions.len.uint8)
   for transaction in ack.transactions:
     result.add(transaction.toBytes)
   result.add(ack.validator.toBytes)
 
-func hash*(ack: Ack): AckHash =
-  AckHash.hash(ack.toBytes)
+func hash*(ack: Ack): Hash =
+  hash(ack.toBytes, HashKind.Ack)
 
 func sign*(key: PrivateKey, ack: var Ack) =
   ack.signature = key.sign(ack.hash.toBytes).some
