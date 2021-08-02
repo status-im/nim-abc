@@ -13,6 +13,8 @@ import ./merge
 ## Uses the dynamic topological sort algorithm by
 ## [Pearce and Kelly](https://www.doc.ic.ac.uk/~phjk/Publications/DynamicTopoSortAlg-JEA-07.pdf).
 
+export `->`
+
 type
   SortedDag*[Vertex] = ref object
     ## A DAG whose vertices are kept in topological order
@@ -92,7 +94,7 @@ func add[V](dag: SortedDag[V], vertex: V) =
   if vertex notin dag:
     dag.order[vertex] = -(dag.order.len)
 
-func add*[V](dag: SortedDag[V], edge: tuple[x, y: V]) =
+func add*[V](dag: SortedDag[V], edge: Edge[V]) =
   ## Adds an edge x -> y to the DAG
   dag.add(edge.y)
   dag.add(edge.x)

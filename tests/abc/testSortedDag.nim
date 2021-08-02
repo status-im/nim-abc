@@ -8,20 +8,20 @@ suite "Sorted DAG":
 
   test "contains vertices":
     var dag = SortedDag[int].new
-    dag.add( (1, 2) )
+    dag.add(1->2)
     check 1 in dag
     check 2 in dag
     check 42 notin dag
-    dag.add( (2, 42) )
+    dag.add(2->42)
     check 42 in dag
 
   test "contains edges":
     var dag = SortedDag[int].new
-    dag.add( (1, 2) )
-    check (1, 2) in dag
-    check (2, 3) notin dag
-    dag.add( (2, 3) )
-    check (2, 3) in dag
+    dag.add(1->2)
+    check (1->2) in dag
+    check (2->3) notin dag
+    dag.add(2->3)
+    check (2->3) in dag
 
   test "visits reachable vertices, nearest first":
 
@@ -30,7 +30,7 @@ suite "Sorted DAG":
     #    ②
 
     var dag = SortedDag[int].new
-    for edge in [ (0, 1), (1, 2), (0, 2) ]:
+    for edge in [0->1, 1->2, 0->2]:
       dag.add(edge)
 
     check toSeq(dag.visit(0)) == @[1, 2]
@@ -46,7 +46,7 @@ suite "Sorted DAG":
     #      ③
 
     var dag = SortedDag[int].new
-    for edge in [ (5, 2), (5, 0), (4, 0), (4, 1), (2, 3), (3, 1) ]:
+    for edge in [5->2, 5->0, 4->0, 4->1, 2->3, 3->1]:
       dag.add(edge)
 
     let reachableFrom5 = toSeq(dag.visit(5))
@@ -65,11 +65,11 @@ suite "Sorted DAG":
     # gain  ←  spend
 
     var dag = SortedDag[string].new
-    for edge in [("acks", "ack1"),
-                 ("acks", "ack2"),
-                 ("ack1", "gain"),
-                 ("ack2", "spend"),
-                 ("spend", "gain")]:
+    for edge in ["acks"->"ack1",
+                 "acks"->"ack2",
+                 "ack1"->"gain",
+                 "ack2"->"spend",
+                 "spend"->"gain"]:
       dag.add(edge)
 
     let walk = toSeq dag.visit("acks")
@@ -91,28 +91,25 @@ suite "Sorted DAG":
 
     var dag = SortedDag[int].new
     for vertex in [1,6]:
-      dag.add((0, vertex))
+      dag.add(0->vertex)
     for vertex in 1..<5:
-      dag.add((vertex, vertex + 1))
+      dag.add(vertex->vertex + 1)
     for vertex in 6..<10:
-      dag.add((vertex, vertex + 1))
+      dag.add(vertex->vertex + 1)
     for vertex in [1, 3, 5]:
-      dag.add((vertex, vertex + 5))
+      dag.add(vertex->vertex + 5)
     for vertex in [2, 4]:
-      dag.add((vertex+5, vertex))
+      dag.add(vertex+5->vertex)
 
     check toSeq(dag.visit(0)) == @[1, 6, 7, 2, 3, 8, 9, 4, 5, 10]
 
   test "handles DAGs with many edges":
 
     var dag = SortedDag[int].new
-
-    var vertices: seq[int]
-
     for _ in 0..10_000:
       let x, y = rand(100)
       if x != y:
-        dag.add((min(x,y), max(x,y)))
+        dag.add(min(x,y)->max(x,y))
 
     var latest = -1
     for vertex in dag.visit(0):
@@ -125,7 +122,7 @@ suite "Sorted DAG":
 
     var dag = SortedDag[int].new
     for i in 1..10_000:
-      dag.add((i, i-1))
+      dag.add(i->i-1)
 
     var latest = 10_000
     for vertex in dag.visit(10_000):
