@@ -8,30 +8,20 @@ suite "Sorted DAG":
 
   test "contains vertices":
     var dag = SortedDag[int].new
-    dag.add(1)
+    dag.add( (1, 2) )
     check 1 in dag
+    check 2 in dag
     check 42 notin dag
-    dag.add(42)
+    dag.add( (2, 42) )
     check 42 in dag
 
   test "contains edges":
     var dag = SortedDag[int].new
-    dag.add(1)
-    dag.add(2)
-    dag.add(3)
     dag.add( (1, 2) )
     check (1, 2) in dag
     check (2, 3) notin dag
     dag.add( (2, 3) )
     check (2, 3) in dag
-
-  test "raises when adding adding edge for unknown vertex":
-    var dag = SortedDag[int].new
-    dag.add(1)
-    expect Defect:
-      dag.add( (1, 2) )
-    expect Defect:
-      dag.add( (2, 1) )
 
   test "visits reachable vertices, nearest first":
 
@@ -40,8 +30,6 @@ suite "Sorted DAG":
     #    ②
 
     var dag = SortedDag[int].new
-    for vertex in 0..2:
-      dag.add(vertex)
     for edge in [ (0, 1), (1, 2), (0, 2) ]:
       dag.add(edge)
 
@@ -58,8 +46,6 @@ suite "Sorted DAG":
     #      ③
 
     var dag = SortedDag[int].new
-    for vertex in 0..5:
-      dag.add(vertex)
     for edge in [ (5, 2), (5, 0), (4, 0), (4, 1), (2, 3), (3, 1) ]:
       dag.add(edge)
 
@@ -79,8 +65,6 @@ suite "Sorted DAG":
     # gain  ←  spend
 
     var dag = SortedDag[string].new
-    for vertex in ["spend", "gain", "ack1", "ack2", "acks"]:
-      dag.add(vertex)
     for edge in [("acks", "ack1"),
                  ("acks", "ack2"),
                  ("ack1", "gain"),
@@ -106,8 +90,6 @@ suite "Sorted DAG":
     #  ⑤  →  ⑩
 
     var dag = SortedDag[int].new
-    for vertex in 0..10:
-      dag.add(vertex)
     for vertex in [1,6]:
       dag.add((0, vertex))
     for vertex in 1..<5:
@@ -126,11 +108,6 @@ suite "Sorted DAG":
     var dag = SortedDag[int].new
 
     var vertices: seq[int]
-    for vertex in 0..100:
-      vertices.add(vertex)
-    vertices.shuffle()
-    for vertex in vertices:
-      dag.add(vertex)
 
     for _ in 0..10_000:
       let x, y = rand(100)
@@ -147,9 +124,7 @@ suite "Sorted DAG":
     #  ⓪ ← ① ← ② ← ...
 
     var dag = SortedDag[int].new
-    dag.add(0)
     for i in 1..10_000:
-      dag.add(i)
       dag.add((i, i-1))
 
     var latest = 10_000

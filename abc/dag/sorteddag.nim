@@ -25,6 +25,12 @@ type
 func new*[V](_: type SortedDag[V]): SortedDag[V] =
   SortedDag[V]()
 
+func contains*[V](dag: SortedDag[V], vertex: V): bool =
+  vertex in dag.order
+
+func contains*[V](dag: SortedDag[V], edge: Edge[V]): bool =
+  edge in dag.edges
+
 func lookup[V](dag: SortedDag[V], vertex: V): SortedVertex[V] =
   SortedVertex[V](vertex: vertex, index: dag.order[vertex])
 
@@ -82,22 +88,16 @@ func update[V](dag: SortedDag[V], lowerbound, upperbound: SortedVertex[V]) =
     let backward = searchBackward(dag, upperbound, lowerbound)
     dag.reorder(forward, backward)
 
-func add*[V](dag: SortedDag[V], vertex: V) =
-  ## Adds a vertex to the DAG
-  dag.order[vertex] = -(dag.order.len)
+func add[V](dag: SortedDag[V], vertex: V) =
+  if vertex notin dag:
+    dag.order[vertex] = -(dag.order.len)
 
 func add*[V](dag: SortedDag[V], edge: tuple[x, y: V]) =
   ## Adds an edge x -> y to the DAG
-  doAssert edge.x in dag
-  doAssert edge.y in dag
+  dag.add(edge.y)
+  dag.add(edge.x)
   dag.edges.incl(edge)
   dag.update(dag.lookup(edge.y), dag.lookup(edge.x))
-
-func contains*[V](dag: SortedDag[V], vertex: V): bool =
-  vertex in dag.order
-
-func contains*[V](dag: SortedDag[V], edge: Edge[V]): bool =
-  edge in dag.edges
 
 iterator visit*[V](dag: SortedDag[V], start: V): V =
   ## Visits all vertices that are reachable from the starting vertex. Vertices
