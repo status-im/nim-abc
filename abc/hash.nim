@@ -15,3 +15,10 @@ func toBytes*(hash: Hash): array[32, byte] =
 
 func hash*(hash: Hash): hashes.Hash =
   hashes.hash(hash.toBytes)
+
+func `$`*(hash: Hash): string =
+  case hash.kind
+  of Tx:
+    "Tx(" & $hash.hash & ")"
+  of Ack:
+    "Ack(" & $hash.hash & ")"
