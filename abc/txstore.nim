@@ -1,6 +1,7 @@
 import pkg/questionable
 import std/tables
 import std/sets
+import std/sequtils
 import ./transactions
 import ./acks
 import ./dag
@@ -54,10 +55,17 @@ func updateVote(store: TxStore, hash: Hash, ack: Ack) =
     for candidate in ack.transactions:
       store.voting.voteNay(candidate, hash, nay)
 
+func isConfirmed*(store: TxStore, hash: Hash): bool
+
 func updateVotes(store: TxStore, ack: Ack) =
+  var todo = ack.transactions
   for hash in store.dag.visit(ack.hash):
-    if hash notin ack.transactions:
-      store.updateVote(hash, ack)
+    if todo.len == 0:
+      break
+    if hash in ack.transactions:
+      continue
+    store.updateVote(hash, ack)
+    todo.keepItIf(not store.isConfirmed(it))
 
 func add*(store: TxStore, transactions: varargs[Transaction]) =
   for transaction in transactions:
