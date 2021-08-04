@@ -27,6 +27,16 @@ suite "Transactions":
     check transaction.inputs.len == 1
     check transaction.outputs.len == 2
 
+  test "transaction value is the sum of its output values":
+    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
+    check genesis.value == 42.u256
+
+  test "output value is the value of the output for given owner":
+    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
+    check genesis.outputValue(alice) == 32.u256
+    check genesis.outputValue(bob) == 10.u256
+    check genesis.outputValue(victor) == 0.u256
+
   test "a transaction can be converted to bytes":
     let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
     let transaction = !Transaction.init(

@@ -88,3 +88,12 @@ func hasValidSignature*(transaction: Transaction): bool =
   let signature = transaction.signature
   let signee = aggregate(signees)
   signee.verify(message, signature)
+
+func value*(transaction: Transaction): UInt256 =
+  for (_, value) in transaction.outputs:
+    result += value
+
+func outputValue*(transaction: Transaction, owner: PublicKey): UInt256 =
+  for (outputOwner, value) in transaction.outputs:
+    if outputOwner == owner:
+      result += value
