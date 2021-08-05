@@ -16,6 +16,7 @@ type
     inputs: seq[TxInput]
     outputs: seq[TxOutput]
     validator: PublicKey
+    hash: Hash
     signature: Signature
   TxInput* = tuple
     transaction: Hash
@@ -23,6 +24,17 @@ type
   TxOutput* = tuple
     owner: PublicKey
     value: UInt256
+
+func toBytes*(transaction: Transaction): seq[byte] =
+  result.add(transaction.inputs.len.uint8)
+  for (txHash, owner) in transaction.inputs:
+    result.add(txHash.toBytes)
+    result.add(owner.toBytes)
+  result.add(transaction.outputs.len.uint8)
+  for (owner, value) in transaction.outputs:
+    result.add(owner.toBytes)
+    result.add(value.toBytes)
+  result.add(transaction.validator.toBytes)
 
 func init*(_: type Transaction,
            inputs: openArray[TxInput],
@@ -38,7 +50,13 @@ func init*(_: type Transaction,
     if input.transaction.kind != HashKind.Tx:
       return none Transaction
 
-  some Transaction(inputs: @inputs, outputs: @outputs, validator: validator)
+  var transaction = Transaction(
+    inputs: @inputs,
+    outputs: @outputs,
+    validator: validator
+  )
+  transaction.hash = hash(transaction.toBytes, HashKind.Tx)
+  some transaction
 
 func init*(_: type Transaction,
            outputs: openArray[TxOutput],
@@ -60,19 +78,8 @@ func validator*(transaction: Transaction): PublicKey =
 func add*(transaction: var Transaction, signature: Signature) =
   transaction.signature = aggregate(transaction.signature, signature)
 
-func toBytes*(transaction: Transaction): seq[byte] =
-  result.add(transaction.inputs.len.uint8)
-  for (txHash, owner) in transaction.inputs:
-    result.add(txHash.toBytes)
-    result.add(owner.toBytes)
-  result.add(transaction.outputs.len.uint8)
-  for (owner, value) in transaction.outputs:
-    result.add(owner.toBytes)
-    result.add(value.toBytes)
-  result.add(transaction.validator.toBytes)
-
 func hash*(transaction: Transaction): Hash =
-  hash(transaction.toBytes, HashKind.Tx)
+  transaction.hash
 
 func sign*(key: PrivateKey, transaction: var Transaction) =
   transaction.add(key.sign(transaction.hash.toBytes))
