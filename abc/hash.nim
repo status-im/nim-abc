@@ -14,7 +14,7 @@ func toBytes*(hash: Hash): array[32, byte] =
   hash.hash.data
 
 func hash*(hash: Hash): hashes.Hash =
-  hashes.hash(hash.toBytes)
+  cast[int](hash.hash.data)
 
 func `$`*(hash: Hash): string =
   case hash.kind
