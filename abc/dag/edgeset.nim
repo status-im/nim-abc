@@ -4,8 +4,8 @@ import std/sets
 type
   EdgeSet*[Vertex] = object
     # invariant: (∀ x->y ∈ outgoing: y<-x ∈ incoming)
-    outgoing: Table[Vertex, HashSet[Vertex]]
-    incoming: Table[Vertex, HashSet[Vertex]]
+    outgoing: Table[Vertex, seq[Vertex]]
+    incoming: Table[Vertex, seq[Vertex]]
   Edge*[Vertex] = object
     x*, y* : Vertex
 
@@ -13,8 +13,14 @@ func init*[V](_: type EdgeSet[V]): EdgeSet[V] =
   discard
 
 func incl*[V](edges: var EdgeSet[V], edge: Edge[V]) =
-  edges.outgoing.mgetOrPut(edge.x, HashSet[V].default).incl(edge.y)
-  edges.incoming.mgetOrPut(edge.y, HashSet[V].default).incl(edge.x)
+  if not edges.outgoing.hasKey(edge.x):
+    edges.outgoing[edge.x] = @[]
+  if not edges.incoming.hasKey(edge.y):
+    edges.incoming[edge.y] = @[]
+  if edge.y notin edges.outgoing[edge.x]:
+    edges.outgoing[edge.x].add(edge.y)
+  if edge.x notin edges.incoming[edge.y]:
+    edges.incoming[edge.y].add(edge.x)
 
 func contains*[V](edges: EdgeSet[V], edge: Edge[V]): bool =
   edge.y in edges.outgoing.getOrDefault(edge.x)
