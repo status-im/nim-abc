@@ -8,7 +8,7 @@ suite "Acknowledgements":
   let victor = PublicKey.victor
 
   test "a first acknowledgement can be made":
-    let ack = Ack.init([tx1.hash, tx2.hash], victor)
+    let ack = Ack.new([tx1.hash, tx2.hash], victor)
     check ack.isSome
     check ack.?transactions == @[tx1.hash, tx2.hash].some
     check ack.?previous == Hash.none
@@ -22,7 +22,7 @@ suite "Acknowledgements":
 
   test "an acknowledgement references a previous acknowledgement":
     let previous = Ack.example
-    let ack = Ack.init(previous.hash, [tx1.hash, tx2.hash], victor)
+    let ack = Ack.new(previous.hash, [tx1.hash, tx2.hash], victor)
     check ack.isSome
     check ack.?transactions == @[tx1.hash, tx2.hash].some
     check ack.?previous == previous.hash.some
@@ -30,7 +30,7 @@ suite "Acknowledgements":
 
   test "an acknowledgement can be converted to bytes":
     let previous = Ack.example
-    let ack = !Ack.init(previous.hash, [tx1.hash, tx2.hash], victor)
+    let ack = !Ack.new(previous.hash, [tx1.hash, tx2.hash], victor)
     var expected: seq[byte]
     expected.add(previous.hash.toBytes)
     expected.add(2) # amount of transactions
@@ -53,7 +53,7 @@ suite "Acknowledgements":
     check ack.signature == key.sign(ack.hash.toBytes).some
 
   test "acknowledgement signature can be checked for validity":
-    var ack = !Ack.init([tx1.hash, tx2.hash], victor)
+    var ack = !Ack.new([tx1.hash, tx2.hash], victor)
     PrivateKey.bob.sign(ack)
     check not ack.hasValidSignature
     PrivateKey.victor.sign(ack)
@@ -61,13 +61,13 @@ suite "Acknowledgements":
 
   test "an acknowledgement must contain at least one transaction":
     let previous = Ack.example
-    check Ack.init(previous.hash, [], victor).isNone
+    check Ack.new(previous.hash, [], victor).isNone
 
   test "previous acknowledgement must have correct hash type":
     let transaction = Transaction.example
     let invalidPrevious = Transaction.example
-    check Ack.init(invalidPrevious.hash, [transaction.hash], victor).isNone
+    check Ack.new(invalidPrevious.hash, [transaction.hash], victor).isNone
 
   test "acknowledged transactions must have correct hash type":
     let invalidTransaction = Ack.example
-    check Ack.init([invalidTransaction.hash], victor).isNone
+    check Ack.new([invalidTransaction.hash], victor).isNone

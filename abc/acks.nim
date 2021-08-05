@@ -6,7 +6,7 @@ export hash
 export keys
 
 type
-  Ack* = object
+  Ack* = ref object
     previous: ?Hash
     transactions: seq[Hash]
     validator: PublicKey
@@ -21,10 +21,10 @@ func toBytes*(ack: Ack): seq[byte] =
     result.add(transaction.toBytes)
   result.add(ack.validator.toBytes)
 
-func init(_: type Ack,
-          previous: ?Hash,
-          transactions: openArray[Hash],
-          validator: PublicKey): ?Ack =
+func new(_: type Ack,
+         previous: ?Hash,
+         transactions: openArray[Hash],
+         validator: PublicKey): ?Ack =
   if previous =? previous and previous.kind != HashKind.Ack:
     return none Ack
 
@@ -43,16 +43,16 @@ func init(_: type Ack,
   ack.hash = hash(ack.toBytes, HashKind.Ack)
   some ack
 
-func init*(_: type Ack,
-           transactions: openArray[Hash],
-           validator: PublicKey): ?Ack =
-  Ack.init(Hash.none, transactions, validator)
+func new*(_: type Ack,
+          transactions: openArray[Hash],
+          validator: PublicKey): ?Ack =
+  Ack.new(Hash.none, transactions, validator)
 
-func init*(_: type Ack,
-           previous: Hash,
-           transactions: openArray[Hash],
-           validator: PublicKey): ?Ack =
-  Ack.init(previous.some, transactions, validator)
+func new*(_: type Ack,
+          previous: Hash,
+          transactions: openArray[Hash],
+          validator: PublicKey): ?Ack =
+  Ack.new(previous.some, transactions, validator)
 
 func previous*(ack: Ack): ?Hash =
   ack.previous

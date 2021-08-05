@@ -12,7 +12,7 @@ export keys
 export hash
 
 type
-  Transaction* = object
+  Transaction* = ref object
     inputs: seq[TxInput]
     outputs: seq[TxOutput]
     validator: PublicKey
@@ -36,10 +36,10 @@ func toBytes*(transaction: Transaction): seq[byte] =
     result.add(value.toBytes)
   result.add(transaction.validator.toBytes)
 
-func init*(_: type Transaction,
-           inputs: openArray[TxInput],
-           outputs: openArray[TxOutput],
-           validator: PublicKey): ?Transaction =
+func new*(_: type Transaction,
+          inputs: openArray[TxInput],
+          outputs: openArray[TxOutput],
+          validator: PublicKey): ?Transaction =
   if outputs.len == 0:
     return none Transaction
 
@@ -58,10 +58,10 @@ func init*(_: type Transaction,
   transaction.hash = hash(transaction.toBytes, HashKind.Tx)
   some transaction
 
-func init*(_: type Transaction,
-           outputs: openArray[TxOutput],
-           validator: PublicKey): ?Transaction =
-  Transaction.init([], outputs, validator)
+func new*(_: type Transaction,
+         outputs: openArray[TxOutput],
+         validator: PublicKey): ?Transaction =
+  Transaction.new([], outputs, validator)
 
 func inputs*(transaction: Transaction): seq[TxInput] =
   transaction.inputs

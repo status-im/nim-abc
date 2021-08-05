@@ -31,4 +31,4 @@ proc genesis*(_: type Transaction): Transaction =
   let alice = PublicKey.alice
   let bob = PublicKey.bob
   let victor = PublicKey.victor
-  !Transaction.init({alice: 100.u256, bob: 100.u256}, victor)
+  !Transaction.new({alice: 100.u256, bob: 100.u256}, victor)

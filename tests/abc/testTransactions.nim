@@ -8,7 +8,7 @@ suite "Transactions":
   let victor = PublicKey.victor
 
   test "a genesis transaction can be made":
-    let genesis = Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
+    let genesis = Transaction.new({alice: 32.u256, bob: 10.u256}, victor)
     check genesis.isSome
 
   test "a transaction has a hash":
@@ -18,8 +18,8 @@ suite "Transactions":
     check transaction1.hash != transaction2.hash
 
   test "a transaction references outputs from other transactions":
-    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
-    let transaction = !Transaction.init(
+    let genesis = !Transaction.new({alice: 32.u256, bob: 10.u256}, victor)
+    let transaction = !Transaction.new(
       {genesis.hash: alice},
       {alice: 2.u256, bob: 30.u256},
       victor
@@ -28,18 +28,18 @@ suite "Transactions":
     check transaction.outputs.len == 2
 
   test "transaction value is the sum of its output values":
-    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
+    let genesis = !Transaction.new({alice: 32.u256, bob: 10.u256}, victor)
     check genesis.value == 42.u256
 
   test "output value is the value of the output for given owner":
-    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
+    let genesis = !Transaction.new({alice: 32.u256, bob: 10.u256}, victor)
     check genesis.outputValue(alice) == 32.u256
     check genesis.outputValue(bob) == 10.u256
     check genesis.outputValue(victor) == 0.u256
 
   test "a transaction can be converted to bytes":
-    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
-    let transaction = !Transaction.init(
+    let genesis = !Transaction.new({alice: 32.u256, bob: 10.u256}, victor)
+    let transaction = !Transaction.new(
       {genesis.hash: alice},
       {alice: 2.u256, bob: 30.u256},
       victor
@@ -73,9 +73,9 @@ suite "Transactions":
     check transaction.signature == key.sign(transaction.hash.toBytes)
 
   test "transaction signature can be checked for validity":
-    let genesis = !Transaction.init({alice: 32.u256, bob: 10.u256}, victor)
+    let genesis = !Transaction.new({alice: 32.u256, bob: 10.u256}, victor)
     check not genesis.hasValidSignature()
-    var transaction = !Transaction.init(
+    var transaction = !Transaction.new(
       {genesis.hash: alice},
       {alice: 2.u256, bob: 30.u256},
       victor
@@ -88,11 +88,11 @@ suite "Transactions":
     check not transaction.hasValidSignature
 
   test "transaction must have at least one output":
-    check Transaction.init([], victor).isNone
+    check Transaction.new([], victor).isNone
 
   test "multiple outputs to the same owner are not allowed":
-    check Transaction.init({alice: 40.u256, alice: 2.u256}, victor).isNone
+    check Transaction.new({alice: 40.u256, alice: 2.u256}, victor).isNone
 
   test "inputs must have correct hash kind":
     let invalid = Ack.example
-    check Transaction.init({invalid.hash: alice}, {bob: 1.u256}, victor).isNone
+    check Transaction.new({invalid.hash: alice}, {bob: 1.u256}, victor).isNone

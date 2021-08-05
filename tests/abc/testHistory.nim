@@ -18,16 +18,16 @@ suite "Past transactions and acknowledgements":
 
   setup:
     store = TxStore.new(genesis)
-    tx1 = !Transaction.init({genesis.hash: alice}, {bob: 100.u256}, victor)
-    tx2 = !Transaction.init({genesis.hash: bob}, {alice: 100.u256}, victor)
-    tx3 = !Transaction.init(
+    tx1 = !Transaction.new({genesis.hash: alice}, {bob: 100.u256}, victor)
+    tx2 = !Transaction.new({genesis.hash: bob}, {alice: 100.u256}, victor)
+    tx3 = !Transaction.new(
       {tx1.hash: bob, tx2.hash: alice},
       {alice: 200.u256},
       victor
     )
-    ack1 = !Ack.init([tx1.hash], victor)
-    ack2 = !Ack.init([tx2.hash], victor)
-    ack3 = !Ack.init(ack1.hash, [tx2.hash, tx3.hash], victor)
+    ack1 = !Ack.new([tx1.hash], victor)
+    ack2 = !Ack.new([tx2.hash], victor)
+    ack3 = !Ack.new(ack1.hash, [tx2.hash, tx3.hash], victor)
     PrivateKey.alice.sign(tx1)
     PrivateKey.bob.sign(tx2)
     PrivateKey.alice.sign(tx3)
@@ -78,8 +78,8 @@ suite "Transaction validation":
 
   setup:
     store = TxStore.new(genesis)
-    tx1 = !Transaction.init({genesis.hash: alice}, {bob: 100.u256}, victor)
-    tx2 = !Transaction.init({tx1.hash: bob}, {alice: 100.u256}, victor)
+    tx1 = !Transaction.new({genesis.hash: alice}, {bob: 100.u256}, victor)
+    tx2 = !Transaction.new({tx1.hash: bob}, {alice: 100.u256}, victor)
     PrivateKey.alice.sign(tx1)
     PrivateKey.bob.sign(tx2)
 
@@ -96,8 +96,8 @@ suite "Transaction validation":
     check past.missing == set(tx1.hash)
 
   test "checks that inputs and outputs match":
-    var bad1 = !Transaction.init({genesis.hash: alice}, {bob: 999.u256}, victor)
-    var bad2 = !Transaction.init({bad1.hash: bob}, {alice: 999.u256}, victor)
+    var bad1 = !Transaction.new({genesis.hash: alice}, {bob: 999.u256}, victor)
+    var bad2 = !Transaction.new({bad1.hash: bob}, {alice: 999.u256}, victor)
     PrivateKey.alice.sign(bad1)
     PrivateKey.bob.sign(bad2)
     store.add(bad1, bad2)
@@ -107,8 +107,8 @@ suite "Transaction validation":
       check past.invalid == set(bad1.hash)
 
   test "checks that signatures match":
-    var bad1 = !Transaction.init({genesis.hash: alice}, {bob: 100.u256}, victor)
-    var bad2 = !Transaction.init({bad1.hash: bob}, {alice: 100.u256}, victor)
+    var bad1 = !Transaction.new({genesis.hash: alice}, {bob: 100.u256}, victor)
+    var bad2 = !Transaction.new({bad1.hash: bob}, {alice: 100.u256}, victor)
     PrivateKey.bob.sign(bad1) # invalid signature, should be signed by alice
     PrivateKey.bob.sign(bad2)
     store.add(bad1, bad2)
@@ -129,10 +129,10 @@ suite "Acknowledgement validation":
 
   setup:
     store = TxStore.new(genesis)
-    tx1 = !Transaction.init({genesis.hash: alice}, {bob: 100.u256}, victor)
-    tx2 = !Transaction.init({tx1.hash: bob}, {alice: 100.u256}, victor)
-    ack1 = !Ack.init([tx1.hash], victor)
-    ack2 = !Ack.init(ack1.hash, [tx2.hash], victor)
+    tx1 = !Transaction.new({genesis.hash: alice}, {bob: 100.u256}, victor)
+    tx2 = !Transaction.new({tx1.hash: bob}, {alice: 100.u256}, victor)
+    ack1 = !Ack.new([tx1.hash], victor)
+    ack2 = !Ack.new(ack1.hash, [tx2.hash], victor)
     PrivateKey.alice.sign(tx1)
     PrivateKey.bob.sign(tx2)
     PrivateKey.victor.sign(ack1)
@@ -159,8 +159,8 @@ suite "Acknowledgement validation":
     check past.missing == set(tx1.hash)
 
   test "checks that no transaction is invalid":
-    var bad = !Transaction.init({genesis.hash: alice}, {bob: 999.u256}, victor)
-    var ack = !Ack.init([bad.hash], victor)
+    var bad = !Transaction.new({genesis.hash: alice}, {bob: 999.u256}, victor)
+    var ack = !Ack.new([bad.hash], victor)
     PrivateKey.alice.sign(bad)
     PrivateKey.victor.sign(ack)
     store.add(bad)
@@ -170,8 +170,8 @@ suite "Acknowledgement validation":
     check past.invalid == set(bad.hash)
 
   test "checks that signatures match":
-    var bad1 = !Ack.init([tx1.hash], victor)
-    var bad2 = !Ack.init(bad1.hash, [tx2.hash], victor)
+    var bad1 = !Ack.new([tx1.hash], victor)
+    var bad2 = !Ack.new(bad1.hash, [tx2.hash], victor)
     PrivateKey.bob.sign(bad1) # invalid signature, should be signed by victor
     PrivateKey.victor.sign(bad2)
     store.add(tx1, tx2)

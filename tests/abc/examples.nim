@@ -20,7 +20,7 @@ proc example*(_: type Transaction): Transaction =
   let victor = PublicKey.victor
   let genesis = Transaction.genesis
   let amount = rand(100).u256
-  var transaction = !Transaction.init(
+  var transaction = !Transaction.new(
     {genesis.hash: alice},
     {carol: amount, alice: 100.u256 - amount},
     victor
@@ -30,4 +30,4 @@ proc example*(_: type Transaction): Transaction =
 proc example*(_: type Ack): Ack =
   let tx1, tx2 = Transaction.example
   let validator = PublicKey.example
-  !Ack.init([tx1.hash, tx2.hash], validator)
+  !Ack.new([tx1.hash, tx2.hash], validator)
