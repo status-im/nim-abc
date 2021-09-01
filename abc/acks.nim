@@ -13,7 +13,7 @@ type
     hash: Hash
     signature: ?Signature
 
-func calculateHash(ack: Ack) =
+func calculateHash*(ack: Ack) =
   var hashing = Hashing.init(HashKind.Ack)
   let previous = ack.previous |? Hash.default
   hashing.update(previous.toBytes)

@@ -8,4 +8,6 @@ import abc/testTransactions
 import abc/testTxStore
 import abc/testWallet
 
+import abc/testPerformance
+
 {.warning[UnusedImport]: off.}

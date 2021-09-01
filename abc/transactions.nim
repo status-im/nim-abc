@@ -25,7 +25,7 @@ type
     owner: PublicKey
     value: UInt256
 
-func calculateHash(transaction: Transaction) =
+func calculateHash*(transaction: Transaction) =
   var hashing = Hashing.init(HashKind.Tx)
   hashing.update([transaction.inputs.len.uint8])
   for (txHash, owner) in transaction.inputs:
