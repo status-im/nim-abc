@@ -28,7 +28,7 @@ suite "Acknowledgements":
     check ack.?previous == previous.hash.some
     check ack.?validator == victor.some
 
-  test "an acknowledgement can be converted to bytes":
+  test "an acknowledgement hash is derived from its fields":
     let previous = Ack.example
     let ack = !Ack.new(previous.hash, [tx1.hash, tx2.hash], victor)
     var expected: seq[byte]
@@ -37,7 +37,7 @@ suite "Acknowledgements":
     expected.add(tx1.hash.toBytes)
     expected.add(tx2.hash.toBytes)
     expected.add(victor.toBytes)
-    check ack.toBytes == expected
+    check ack.hash == hash(expected, HashKind.Ack)
 
   test "a signature can be added to an acknowledgment":
     let key = PrivateKey.example

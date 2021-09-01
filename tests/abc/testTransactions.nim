@@ -37,7 +37,7 @@ suite "Transactions":
     check genesis.outputValue(bob) == 10.u256
     check genesis.outputValue(victor) == 0.u256
 
-  test "a transaction can be converted to bytes":
+  test "a transaction hash is derived from its fields":
     let genesis = !Transaction.new({alice: 32.u256, bob: 10.u256}, victor)
     let transaction = !Transaction.new(
       {genesis.hash: alice},
@@ -54,7 +54,7 @@ suite "Transactions":
     expected.add(bob.toBytes)
     expected.add(30.u256.toBytes)
     expected.add(victor.toBytes)
-    check transaction.toBytes == expected
+    check transaction.hash == hash(expected, HashKind.Tx)
 
   test "signatures can be added to a transaction":
     let key1, key2 = PrivateKey.example

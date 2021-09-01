@@ -13,13 +13,15 @@ type
     hash: Hash
     signature: ?Signature
 
-func toBytes*(ack: Ack): seq[byte] =
+func calculateHash(ack: Ack) =
+  var hashing = Hashing.init(HashKind.Ack)
   let previous = ack.previous |? Hash.default
-  result.add(previous.toBytes)
-  result.add(ack.transactions.len.uint8)
+  hashing.update(previous.toBytes)
+  hashing.update([ack.transactions.len.uint8])
   for transaction in ack.transactions:
-    result.add(transaction.toBytes)
-  result.add(ack.validator.toBytes)
+    hashing.update(transaction.toBytes)
+  hashing.update(ack.validator.toBytes)
+  ack.hash = hashing.finish()
 
 func new(_: type Ack,
          previous: ?Hash,
@@ -40,7 +42,7 @@ func new(_: type Ack,
     transactions: @transactions,
     validator: validator
   )
-  ack.hash = hash(ack.toBytes, HashKind.Ack)
+  ack.calculateHash()
   some ack
 
 func new*(_: type Ack,

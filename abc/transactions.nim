@@ -25,16 +25,18 @@ type
     owner: PublicKey
     value: UInt256
 
-func toBytes*(transaction: Transaction): seq[byte] =
-  result.add(transaction.inputs.len.uint8)
+func calculateHash(transaction: Transaction) =
+  var hashing = Hashing.init(HashKind.Tx)
+  hashing.update([transaction.inputs.len.uint8])
   for (txHash, owner) in transaction.inputs:
-    result.add(txHash.toBytes)
-    result.add(owner.toBytes)
-  result.add(transaction.outputs.len.uint8)
+    hashing.update(txHash.toBytes)
+    hashing.update(owner.toBytes)
+  hashing.update([transaction.outputs.len.uint8])
   for (owner, value) in transaction.outputs:
-    result.add(owner.toBytes)
-    result.add(value.toBytes)
-  result.add(transaction.validator.toBytes)
+    hashing.update(owner.toBytes)
+    hashing.update(value.toBytes)
+  hashing.update(transaction.validator.toBytes)
+  transaction.hash = hashing.finish()
 
 func new*(_: type Transaction,
           inputs: openArray[TxInput],
@@ -55,7 +57,7 @@ func new*(_: type Transaction,
     outputs: @outputs,
     validator: validator
   )
-  transaction.hash = hash(transaction.toBytes, HashKind.Tx)
+  transaction.calculateHash()
   some transaction
 
 func new*(_: type Transaction,
