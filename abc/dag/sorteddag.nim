@@ -25,7 +25,7 @@ type
     index: int
 
 func new*[V](_: type SortedDag[V]): SortedDag[V] =
-  SortedDag[V]()
+  SortedDag[V](edges: EdgeSet[V].init())
 
 func contains*[V](dag: SortedDag[V], vertex: V): bool =
   vertex in dag.order
