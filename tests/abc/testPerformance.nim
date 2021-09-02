@@ -16,7 +16,7 @@ suite "Performance":
     while (now() - start) < timespan:
       body
       inc count
-    count
+    count - 1
 
   template statistic(name, value) =
     echo "  ", alignLeft(name & ":", 30), " ", align($value, 7)
@@ -53,10 +53,8 @@ suite "Performance":
     let transactions = generateTransactions(10_000)
     var store = TxStore.new(Transaction.genesis)
     var index = 0
-    let count = repeat(initDuration(milliseconds = 10)):
-      store.add(transactions[index])
-      inc index
-      if index == transactions.len:
-        index = 0
-        store = TxStore.new(Transaction.genesis)
-    statistic "transactions per second", count * 100
+    for _ in 0..<4:
+      let count = repeat(initDuration(milliseconds = 10)):
+        store.add(transactions[index])
+        inc index
+      statistic "transactions per second", count * 100
