@@ -1,5 +1,5 @@
-ABC - asynchronouos blockchain
-==============================
+ABC - asynchronous blockchain
+=============================
 
 A highly experimental implementation of the permissionless, asynchronous
 blockchain architecture as laid out in the [ABC paper][1]. The goal of this
