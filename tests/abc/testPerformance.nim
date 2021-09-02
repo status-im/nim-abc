@@ -41,12 +41,21 @@ suite "Performance":
     statistic "signatures per second", count * 100
 
   proc generateTransactions(amount: int): seq[Transaction] =
-    var tx = Transaction.genesis
+    var tx: ?Transaction
     var payer = alice
     var receiver = bob
     for _ in 0..<amount:
-      tx = !Transaction.new({tx.hash: payer}, {receiver: 100.u256}, victor)
-      result.add(tx)
+      if previous =? tx:
+        tx = Transaction.new(
+          {previous.hash: payer},
+          {receiver: 200.u256},
+          victor)
+      else:
+        tx = Transaction.new(
+          {Transaction.genesis.hash: alice, Transaction.genesis.hash: bob},
+          {alice: 200.u256},
+          victor)
+      result.add(!tx)
       (payer, receiver) = (receiver, payer)
 
   test "add transaction to store":
