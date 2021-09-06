@@ -1,5 +1,6 @@
 import std/times
 import std/strutils
+import std/random
 import abc/txstore
 import ./basics
 import ./alicebob
@@ -66,6 +67,14 @@ suite "Performance":
       let count = repeat(initDuration(milliseconds = 10)):
         store.add(transactions[index])
         inc index
+      statistic "transactions per second", count * 100
+
+  test "↑↑↑ add transactions in random order ↑↑↑":
+    let transactions = generateTransactions(10_000)
+    var store = TxStore.new(Transaction.genesis)
+    for _ in 0..<4:
+      let count = repeat(initDuration(milliseconds = 10)):
+        store.add(transactions.sample)
       statistic "transactions per second", count * 100
 
   proc generateAcks(transactions: openArray[Transaction]): seq[Ack] =
