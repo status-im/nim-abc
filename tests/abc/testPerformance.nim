@@ -78,14 +78,14 @@ suite "Performance":
         ack = Ack.new([tx.hash], victor)
         result.add(!ack)
 
-  test "add acknowledgement to store":
+  test "add transaction with ack to store":
     let transactions = generateTransactions(10_000)
     let acks = generateAcks(transactions)
     var store = TxStore.new(Transaction.genesis)
-    store.add(transactions)
     var index = 0
     for _ in 0..<4:
       let count = repeat(initDuration(milliseconds = 10)):
+        store.add(transactions[index])
         store.add(acks[index])
         inc index
       statistic "acks per second", count * 100
