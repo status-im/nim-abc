@@ -57,9 +57,9 @@ excercise.
 On a single core of an Intel i7-10710U CPU we observed the folowing:
 
 - Transaction hashing (SHA256): ~50 000 hashes per second
-- Acknowledgement hashing (SHA256): ~80 0000 hashes per second
+- Acknowledgement hashing (SHA256): ~80 000 hashes per second
 - Signing transactions and acknowledgements (BLS): ~1 500 signatures per second
-- Adding transactions to the store: ~80 0000 transactions per second
+- Adding transactions to the store: ~80 000 transactions per second
 - Adding transaction + acknowledgement to the store: ~15 000 acks per second
 
 Adding transactions and acknowledgements to the store includes topological
